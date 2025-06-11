@@ -10,7 +10,9 @@ type SystemHealthServicer struct {
 }
 
 func NewSystemHealthServicer(aha ports.SystemHealthAdapter) *SystemHealthServicer {
-	return &SystemHealthServicer{}
+	return &SystemHealthServicer{
+		shAdapter: aha,
+	}
 }
 
 func (shs *SystemHealthServicer) ProcessSystemHealthRequest() domain.System {
