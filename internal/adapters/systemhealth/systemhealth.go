@@ -2,7 +2,14 @@ package systemhealth
 
 import "github.com/ctfrancia/maple/internal/core/domain"
 
-func GetSystemInfo() domain.System {
+type SystemHealthAdapter struct {
+}
+
+func NewSystemHealthAdapter() *SystemHealthAdapter {
+	return &SystemHealthAdapter{}
+}
+
+func (sha *SystemHealthAdapter) GetSystemInfo() domain.System {
 	system := domain.System{
 		Version: "1.0.0",
 	}
