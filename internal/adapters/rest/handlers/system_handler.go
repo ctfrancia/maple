@@ -7,17 +7,19 @@ import (
 	"net/http"
 
 	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto"
+	"github.com/ctfrancia/maple/internal/adapters/rest/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
 )
 
 type SystemHealthHandler struct {
-	system ports.SystemServicer
-	// response ports.Responses
+	system   ports.SystemServicer
+	response ports.SystemResponder
 }
 
 func NewSystemHandler(ss ports.SystemServicer) *SystemHealthHandler {
 	handler := &SystemHealthHandler{
-		system: ss,
+		system:   ss,
+		response: response.NewHelper(),
 	}
 
 	return handler
@@ -38,7 +40,7 @@ func (h *SystemHealthHandler) HealthHandler(w http.ResponseWriter, r *http.Reque
 func (h *SystemHealthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
-func (h *SystemHealthHandler) CreateNewHandler(w http.ResponseWriter, r *http.Request) {
+func (h *SystemHealthHandler) NewConsumerHandler(w http.ResponseWriter, r *http.Request) {
 	var requestBody dto.NewAPIConsumerRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&requestBody); err != nil {

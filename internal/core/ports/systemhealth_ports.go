@@ -9,7 +9,7 @@ import (
 type SystemHandler interface {
 	HealthHandler(w http.ResponseWriter, r *http.Request)
 	LoginHandler(w http.ResponseWriter, r *http.Request)
-	CreateNewHandler(w http.ResponseWriter, r *http.Request)
+	NewConsumerHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type SystemServicer interface {

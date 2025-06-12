@@ -35,6 +35,7 @@ func (r *Router) Routes() *chi.Mux {
 		v1.Route("/system", func(v1s chi.Router) {
 			v1s.Get("/health", r.sysHandler.HealthHandler)
 			v1s.Post("/login", r.sysHandler.LoginHandler)
+			v1s.Post("/new-consumer", r.sysHandler.NewConsumerHandler)
 		})
 	})
 
