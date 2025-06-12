@@ -11,13 +11,13 @@ import (
 )
 
 type SystemHealthHandler struct {
-	system   ports.SystemHealthServicer
-	response ports.Responses
+	system ports.SystemServicer
+	// response ports.Responses
 }
 
-func NewSystemHandler(shs ports.SystemHealthServicer) *SystemHealthHandler {
+func NewSystemHandler(ss ports.SystemServicer) *SystemHealthHandler {
 	handler := &SystemHealthHandler{
-		system: shs,
+		system: ss,
 	}
 
 	return handler

@@ -12,12 +12,12 @@ import (
 )
 
 type Router struct {
-	sysHealthHandler ports.SystemHealthHandler
+	sysHandler ports.SystemHandler
 }
 
-func NewRouter(shh ports.SystemHealthServicer) *chi.Mux {
+func NewRouter(ss ports.SystemServicer) *chi.Mux {
 	routes := &Router{
-		sysHealthHandler: handlers.NewSystemHealthHandler(shh),
+		sysHandler: handlers.NewSystemHandler(ss),
 	}
 
 	return routes.Routes()
@@ -33,8 +33,8 @@ func (r *Router) Routes() *chi.Mux {
 
 	mux.Route("/v1", func(v1 chi.Router) {
 		v1.Route("/system", func(v1s chi.Router) {
-			v1s.Get("/health", r.sysHealthHandler.Handle)
-			v1s.Post("login", r.loginHandler.Handle)
+			v1s.Get("/health", r.sysHandler.HealthHandler)
+			v1s.Post("/login", r.sysHandler.LoginHandler)
 		})
 	})
 

@@ -3,6 +3,7 @@ package response
 import (
 	"encoding/json"
 	"go.uber.org/zap"
+	"maps"
 	"net/http"
 )
 
@@ -18,16 +19,15 @@ func NewHelper(logger *zap.Logger) *Helper {
 
 type envelope map[string]any
 
-func (h *Helper) WriteJSON(w http.ResponseWriter, status int, data interface{}, headers http.Header) error {
-	js, err := json.MarshalIndent(data, "", "\t")
+func (h *Helper) WriteJSON(w http.ResponseWriter, status int, data any, headers http.Header) error {
+	// js, err := json.MarshalIndent(data, "", "\t")
+	js, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 	js = append(js, '\n')
 
-	for key, value := range headers {
-		w.Header()[key] = value
-	}
+	maps.Copy(w.Header(), headers)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(js)

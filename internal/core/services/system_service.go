@@ -6,15 +6,15 @@ import (
 )
 
 type SystemHealthServicer struct {
-	shAdapter ports.SystemHealthAdapter
+	sAdapter ports.SystemAdapter
 }
 
-func NewSystemHealthServicer(aha ports.SystemHealthAdapter) *SystemHealthServicer {
+func NewSystemHealthServicer(sa ports.SystemAdapter) *SystemHealthServicer {
 	return &SystemHealthServicer{
-		shAdapter: aha,
+		sAdapter: sa,
 	}
 }
 
 func (shs *SystemHealthServicer) ProcessSystemHealthRequest() domain.System {
-	return shs.shAdapter.GetSystemInfo()
+	return shs.sAdapter.GetSystemInfo()
 }

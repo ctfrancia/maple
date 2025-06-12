@@ -6,14 +6,16 @@ import (
 	"github.com/ctfrancia/maple/internal/core/domain"
 )
 
-type SystemHealthHandler interface {
-	Handle(w http.ResponseWriter, r *http.Request)
+type SystemHandler interface {
+	HealthHandler(w http.ResponseWriter, r *http.Request)
+	LoginHandler(w http.ResponseWriter, r *http.Request)
+	CreateNewHandler(w http.ResponseWriter, r *http.Request)
 }
 
-type SystemHealthServicer interface {
+type SystemServicer interface {
 	ProcessSystemHealthRequest() domain.System
 }
 
-type SystemHealthAdapter interface {
+type SystemAdapter interface {
 	GetSystemInfo() domain.System
 }
