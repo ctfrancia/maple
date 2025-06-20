@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/ctfrancia/maple/internal/adapters/logger"
 	"github.com/ctfrancia/maple/internal/adapters/rest"
 	"github.com/ctfrancia/maple/internal/adapters/system"
 	"github.com/ctfrancia/maple/internal/core/services"
 )
 
 func main() {
+	logger := logger.NewZapLogger("dev")
 	// Adapters
 	sa := system.NewSystemAdapter()
 

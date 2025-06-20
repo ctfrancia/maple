@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ctfrancia/maple/internal/adapters/logger"
 	"github.com/ctfrancia/maple/internal/adapters/rest/handlers"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/go-chi/chi/v5"
@@ -16,8 +17,9 @@ type Router struct {
 }
 
 func NewRouter(ss ports.SystemServicer) *chi.Mux {
+	logger := logger.NewZapLogger("dev")
 	routes := &Router{
-		sysHandler: handlers.NewSystemHandler(ss),
+		sysHandler: handlers.NewSystemHandler(ss, logger),
 	}
 
 	return routes.Routes()
