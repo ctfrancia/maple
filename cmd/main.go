@@ -64,5 +64,5 @@ func main() {
 		logger.Fatal(ctx, "Server forced to shutdown: "+err.Error())
 	}
 
-	logger.Info(ctx, "Server stopped gracefully")
+	logger.Info(nil, "Server stopped gracefully")
 }

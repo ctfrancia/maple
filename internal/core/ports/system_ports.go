@@ -1,4 +1,4 @@
-// ports represents the interface for how the core interfaces with the rest of the world
+// Package ports represents the interface for how the core interfaces with the rest of the world
 package ports
 
 import (
