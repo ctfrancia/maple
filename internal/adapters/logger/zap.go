@@ -1,11 +1,13 @@
+// logger provides a zap logger that is used for logging
 package logger
 
 import (
 	"context"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
-	"os"
 )
 
 type ZapAdapter struct {
@@ -70,7 +72,7 @@ func newZapLogger(env string) *zap.Logger {
 	return zap.New(core, zap.AddCaller())
 }
 
-// Implement the Logger interface
+// Debug logs a message at DebugLevel. The message includes any fields passed
 func (z *ZapAdapter) Debug(ctx context.Context, msg string, fields ...zap.Field) {
 	z.logger.Debug(msg, fields...)
 }

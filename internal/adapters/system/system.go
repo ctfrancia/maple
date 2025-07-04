@@ -1,9 +1,9 @@
+// Package system provides a system adapter that is used for system information operations such as health checks
 package system
 
 import "github.com/ctfrancia/maple/internal/core/domain"
 
-type SystemAdapter struct {
-}
+type SystemAdapter struct{}
 
 func NewSystemAdapter() *SystemAdapter {
 	return &SystemAdapter{}

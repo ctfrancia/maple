@@ -16,25 +16,28 @@ type SystemHealthHandler struct {
 	response ports.SystemResponder
 }
 
-func NewSystemHandler(ss ports.SystemServicer) *SystemHealthHandler {
+func NewSystemHandler(ss ports.SystemServicer, logger ports.LoggerServicer) *SystemHealthHandler {
 	handler := &SystemHealthHandler{
 		system:   ss,
-		response: response.NewHelper(),
+		response: response.NewHelper(logger),
 	}
 
 	return handler
 }
 
 func (h *SystemHealthHandler) HealthHandler(w http.ResponseWriter, r *http.Request) {
+	// start of the business logic
 	sysInfo := h.system.ProcessSystemHealthRequest()
+
+	// end of the business logic
 	res, err := json.Marshal(sysInfo)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		h.response.ServerErrorResponse(w, r, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write(res)
+	// write the response
+	h.response.WriteJSON(w, http.StatusOK, res, nil)
 }
 
 func (h *SystemHealthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {

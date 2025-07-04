@@ -20,7 +20,7 @@ func main() {
 	shs := services.NewSystemHealthServicer(sa)
 
 	// Create a new router
-	router := rest.NewRouter(shs)
+	router := rest.NewRouter(shs, logger)
 
 	// Start the server
 
@@ -31,7 +31,7 @@ func main() {
 
 	err := srv.ListenAndServe()
 	if err != nil {
-		fmt.Println("error starting server: ", err)
+		logger.Fatal(nil, err.Error())
 		os.Exit(1)
 	}
 }

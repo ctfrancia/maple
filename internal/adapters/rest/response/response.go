@@ -1,17 +1,20 @@
+// Package response is what's responsible for writing the response to the client
 package response
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 	"maps"
 	"net/http"
+
+	"github.com/ctfrancia/maple/internal/core/ports"
+	"go.uber.org/zap"
 )
 
 type Helper struct {
-	logger *zap.Logger
+	logger ports.LoggerServicer
 }
 
-func NewHelper(logger *zap.Logger) *Helper {
+func NewHelper(logger ports.LoggerServicer) *Helper {
 	return &Helper{
 		logger: logger,
 	}
@@ -69,9 +72,10 @@ func (h *Helper) ConflictResponse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Helper) logError(r *http.Request, err error) {
+	ctx := r.Context()
 	fields := []zap.Field{
 		zap.String("method", r.Method),
 		zap.String("uri", r.URL.RequestURI()),
 	}
-	h.logger.Error(err.Error(), fields...)
+	h.logger.Error(ctx, err.Error(), fields...)
 }

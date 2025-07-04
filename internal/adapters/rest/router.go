@@ -1,3 +1,4 @@
+// rest package is the REST API implementation
 package rest
 
 import (
@@ -5,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ctfrancia/maple/internal/adapters/logger"
 	"github.com/ctfrancia/maple/internal/adapters/rest/handlers"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/go-chi/chi/v5"
@@ -16,8 +16,7 @@ type Router struct {
 	sysHandler ports.SystemHandler
 }
 
-func NewRouter(ss ports.SystemServicer) *chi.Mux {
-	logger := logger.NewZapLogger("dev")
+func NewRouter(ss ports.SystemServicer, logger ports.LoggerServicer) *chi.Mux {
 	routes := &Router{
 		sysHandler: handlers.NewSystemHandler(ss, logger),
 	}
