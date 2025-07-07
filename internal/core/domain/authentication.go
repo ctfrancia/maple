@@ -3,11 +3,12 @@ package domain
 // import "time"
 
 type (
-	EntityType   string
-	Permission   string
-	UserStatus   string
-	ConsumerTier string
-	AuthMethod   string
+	EntityType     string
+	Permission     string
+	UserStatus     string
+	ConsumerTier   string
+	ConsumerStatus string
+	AuthMethod     string
 )
 
 const (
