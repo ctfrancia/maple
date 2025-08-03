@@ -15,6 +15,7 @@ type SystemHandler interface {
 
 type SystemServicer interface {
 	ProcessSystemHealthRequest() domain.System
+	Login(username, password string) (any, error)
 }
 
 type SystemAdapter interface {

@@ -1,4 +1,4 @@
-// handlers within this package are for the system, this means the apiconsumers
+// package system handlers within this package are for the system, this means the apiconsumers
 // the ones that can consume the api
 package handlers
 
@@ -42,8 +42,9 @@ func (h *SystemHealthHandler) HealthHandler(w http.ResponseWriter, r *http.Reque
 	h.response.WriteJSON(w, http.StatusOK, res, nil)
 }
 
+// LoginHandler handles the login request for logging into the system this LoginHandler is for
+// logging in as a API consumer, which will have access to the APIs of Maple
 func (h *SystemHealthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	data := map[string]string{"message": "login"}
 	// get the request body
 	var requestBody dto.SystemLoginRequest
 	decoder := json.NewDecoder(r.Body)
@@ -51,13 +52,27 @@ func (h *SystemHealthHandler) LoginHandler(w http.ResponseWriter, r *http.Reques
 		h.response.BadRequestResponse(w, r, err)
 		return
 	}
+	// TODO: add validation for the request body here it will also transform to the domain model
+
+	// Pass request to the service layer
+	resp, err := h.system.Login(requestBody.Username, requestBody.Password)
+	if err != nil {
+		h.response.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	// TODO: this request needs to be sent to the service/domain layer
 
 	h.logger.Info(r.Context(), "login attempt", ports.String("username", requestBody.Username))
-	// write headers
+
+	// FIXME: write headers this should be done in the response package
 	headers := http.Header{"Content-Type": []string{"application/json"}}
-	h.response.WriteJSON(w, http.StatusOK, data, headers)
+
+	h.response.WriteJSON(w, http.StatusOK, resp, headers)
 }
 
+// NewConsumerHandler handles the request for creating a new API consumer that will be
+// able to use the APIs of Maple
 func (h *SystemHealthHandler) NewConsumerHandler(w http.ResponseWriter, r *http.Request) {
 	var requestBody dto.NewAPIConsumerRequest
 	decoder := json.NewDecoder(r.Body)

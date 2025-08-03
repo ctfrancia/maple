@@ -18,3 +18,7 @@ func NewSystemHealthServicer(sa ports.SystemAdapter) *SystemHealthServicer {
 func (shs *SystemHealthServicer) ProcessSystemHealthRequest() domain.System {
 	return shs.sAdapter.GetSystemInfo()
 }
+
+func (shs *SystemHealthServicer) Login(username, password string) {
+	// return shs.sAdapter.Login(username, password)
+}
