@@ -16,11 +16,7 @@ type Router struct {
 	sysHandler ports.SystemHandler
 }
 
-<<<<<<< HEAD
-func NewRouter(ss ports.SystemServicer, logger ports.LoggerServicer) *chi.Mux {
-=======
 func NewRouter(log ports.Logger, ss ports.SystemServicer) *chi.Mux {
->>>>>>> 1277361 (create tests for infrastructure and add logging ports etc)
 	routes := &Router{
 		sysHandler: handlers.NewSystemHandler(ss, log),
 	}

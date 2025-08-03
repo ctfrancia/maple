@@ -16,14 +16,10 @@ type SystemHealthHandler struct {
 	response ports.SystemResponder
 }
 
-<<<<<<< HEAD
-func NewSystemHandler(ss ports.SystemServicer, logger ports.LoggerServicer) *SystemHealthHandler {
-=======
-func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) *SystemHandler {
->>>>>>> 1277361 (create tests for infrastructure and add logging ports etc)
+func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) *SystemHealthHandler {
 	handler := &SystemHealthHandler{
 		system:   ss,
-		response: response.NewHelper(logger),
+		response: response.NewHelper(log),
 	}
 
 	return handler

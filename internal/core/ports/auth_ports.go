@@ -1,11 +1,12 @@
 package ports
 
 import (
-	"context"
+// "context"
 
-	"github.com/ctfrancia/maple/internal/core/domain"
+// "github.com/ctfrancia/maple/internal/core/domain"
 )
 
+/*
 // AuthenticationServicer defines the authentication use case
 type AuthenticationServicer interface {
 	// Login authenticates with username/password (typically for users)
@@ -37,3 +38,4 @@ type TokenRepository interface {
 	GenerateToken(ctx context.Context, entity domain.AuthenticatedEntity) (string, time.Time, error)
 	ValidateToken(ctx context.Context, token string) (*domain.AuthResult, error)
 }
+*/
