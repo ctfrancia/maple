@@ -7,97 +7,82 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"gopkg.in/natefinch/lumberjack.v2"
+
+	"github.com/ctfrancia/maple/internal/core/ports"
 )
 
-type ZapAdapter struct {
+// ZapLogger is a logger that uses the Zap library
+type ZapLogger struct {
 	logger *zap.Logger
 }
 
-// NewZapLogger creates a new zap logger based on environment
-func NewZapLogger(env string) *ZapAdapter {
-	zapLogger := newZapLogger(env)
-	return &ZapAdapter{logger: zapLogger}
-}
+// NewZapLogger creates a new ZapLogger
+func NewZapLogger(env string) ports.Logger {
+	var config zap.Config
 
-// Your existing code slightly modified
-func newZapLogger(env string) *zap.Logger {
-	var core zapcore.Core
-	err := os.MkdirAll("./internal/logs", os.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-
-	isDev := env == "dev" || env == "test"
-	encoderConfig := zapcore.EncoderConfig{
-		TimeKey:        "time",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.ISO8601TimeEncoder,
-		EncodeDuration: zapcore.StringDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-
-	logLevel := zap.InfoLevel
-	if isDev {
-		// In development: Use a console encoder and write to stderr
-		logLevel = zap.DebugLevel
-		consoleEncoder := zapcore.NewConsoleEncoder(encoderConfig)
-		core = zapcore.NewCore(
-			consoleEncoder,
-			zapcore.AddSync(os.Stderr),
-			logLevel,
-		)
+	if env == "prod" {
+		config = zap.NewProductionConfig()
+		// Add log rotation and other production configs here
 	} else {
-		// In production/other environments: Use JSON encoder and log rotation
-		logRotator := &lumberjack.Logger{
-			Filename:   "./internal/logs/buho.log",
-			MaxSize:    10, // megabytes
-			MaxBackups: 3,
-			MaxAge:     28, // days
-			Compress:   true,
-		}
-		core = zapcore.NewCore(
-			zapcore.NewJSONEncoder(encoderConfig),
-			zapcore.AddSync(logRotator),
-			logLevel,
-		)
+		config = zap.NewDevelopmentConfig()
+		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	return zap.New(core, zap.AddCaller())
+	logger, err := config.Build()
+	if err != nil {
+		panic("Failed to initialize logger: " + err.Error())
+	}
+
+	return &ZapLogger{
+		logger: logger,
+	}
 }
 
-// Debug logs a message at DebugLevel. The message includes any fields passed
-func (z *ZapAdapter) Debug(ctx context.Context, msg string, fields ...zap.Field) {
-	z.logger.Debug(msg, fields...)
+// convertFields converts domain LogFields to zap.Fields
+func (z *ZapLogger) convertFields(fields []ports.LogField) []zap.Field {
+	zapFields := make([]zap.Field, len(fields))
+	for i, field := range fields {
+		switch v := field.Value.(type) {
+		case error:
+			zapFields[i] = zap.Error(v)
+		case string:
+			zapFields[i] = zap.String(field.Key, v)
+		case int:
+			zapFields[i] = zap.Int(field.Key, v)
+		case int64:
+			zapFields[i] = zap.Int64(field.Key, v)
+		case float64:
+			zapFields[i] = zap.Float64(field.Key, v)
+		case bool:
+			zapFields[i] = zap.Bool(field.Key, v)
+		default:
+			zapFields[i] = zap.Any(field.Key, v)
+		}
+	}
+	return zapFields
 }
 
-func (z *ZapAdapter) Info(ctx context.Context, msg string, fields ...zap.Field) {
-	z.logger.Info(msg, fields...)
+// Debug logs a message at DebugLevel
+func (z *ZapLogger) Debug(ctx context.Context, msg string, fields ...ports.LogField) {
+	z.logger.Debug(msg, z.convertFields(fields)...)
 }
 
-func (z *ZapAdapter) Warn(ctx context.Context, msg string, fields ...zap.Field) {
-	z.logger.Warn(msg, fields...)
+// Info logs a message at InfoLevel
+func (z *ZapLogger) Info(ctx context.Context, msg string, fields ...ports.LogField) {
+	z.logger.Info(msg, z.convertFields(fields)...)
 }
 
-func (z *ZapAdapter) Error(ctx context.Context, msg string, fields ...zap.Field) {
-	z.logger.Error(msg, fields...)
+// warn logs a message at WarnLevel
+func (z *ZapLogger) Warn(ctx context.Context, msg string, fields ...ports.LogField) {
+	z.logger.Warn(msg, z.convertFields(fields)...)
 }
 
-func (z *ZapAdapter) Fatal(ctx context.Context, msg string, fields ...zap.Field) {
-	z.logger.Fatal(msg, fields...)
+// Error logs a message at ErrorLevel
+func (z *ZapLogger) Error(ctx context.Context, msg string, fields ...ports.LogField) {
+	z.logger.Error(msg, z.convertFields(fields)...)
 }
 
-/*
-// Optional: Add WithContext for tracing/request IDs
-func (z *ZapAdapter) WithContext(ctx context.Context) *zap.Logger {
-	// You could extract values from context here
-	// For example: request ID, user ID, etc.
-	return z
+// Fatal logs a message at FatalLevel
+func (z *ZapLogger) Fatal(ctx context.Context, msg string, fields ...ports.LogField) {
+	z.logger.Fatal(msg, z.convertFields(fields)...)
 }
-*/

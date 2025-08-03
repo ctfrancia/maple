@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,12 +12,32 @@ import (
 	"github.com/ctfrancia/maple/internal/adapters/logger"
 	"github.com/ctfrancia/maple/internal/adapters/rest"
 	"github.com/ctfrancia/maple/internal/adapters/system"
+	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/ctfrancia/maple/internal/core/services"
 )
 
 func main() {
-	// create ancillary services
-	logger := logger.NewZapLogger("dev")
+	var log ports.Logger
+	env := os.Getenv("ENV")
+
+	switch env {
+	case "prod":
+		log = logger.NewZapLogger(env)
+
+	case "dev", "test":
+		log = logger.NewZapLogger(env)
+
+	default:
+		log = logger.NewZapLogger("dev")
+		fmt.Println("This is not a production environment, using dev logger")
+		os.Exit(1)
+	}
+
+	log = logger.NewZapLogger(env)
+	log.Info(context.Background(), "Starting server")
+
+	// infrastructure
+	ia := infrastructure.NewAPIInfrastructure()
 
 	// Adapters
 	sa := system.NewSystemAdapter()
@@ -24,45 +45,42 @@ func main() {
 	// Services
 	shs := services.NewSystemHealthServicer(sa)
 
-	// Create router
-	router := rest.NewRouter(shs, logger)
-
-	// Server configuration
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
+	// Create a new router
+	router := rest.NewRouter(log, shs)
 
 	srv := &http.Server{
-		Addr:         ":" + port, // TODO: come from config
+		Addr:         ":8080",
 		Handler:      router,
-		ReadTimeout:  15 * time.Second, // TODO: come from config
-		WriteTimeout: 15 * time.Second, // TODO: come from config
-		IdleTimeout:  60 * time.Second, // TODO: come from config
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	}
+
+	// Channel to listen for interrupt signal to trigger shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	// Start server in a goroutine so it doesn't block
 	go func() {
-		logger.Info(nil, "Starting server on port "+port)
+		log.Info(context.Background(), "Server starting on :8080")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Fatal(nil, "Server failed to start: "+err.Error())
+			log.Error(context.Background(), "Failed to start server", ports.Error("error", err))
+			os.Exit(1)
 		}
 	}()
 
-	// Wait for interrupt signal to gracefully shutdown
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+	log.Info(context.Background(), "Shutting down server...")
 
-	logger.Info(nil, "Shutting down server...")
-
-	// Give outstanding requests 30 seconds to complete
+	// Creates a deadline for shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	// Attempt graceful shutdown
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Fatal(ctx, "Server forced to shutdown: "+err.Error())
+		log.Error(context.Background(), "Server forced to shutdown", ports.Error("error", err))
+		os.Exit(1)
 	}
 
-	logger.Info(nil, "Server stopped gracefully")
+	log.Info(context.Background(), "Server exited")
 }
