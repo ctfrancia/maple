@@ -1,0 +1,4 @@
+.PHONY: run-dev
+	
+run-dev:
+	go run ./...

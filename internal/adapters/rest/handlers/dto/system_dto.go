@@ -8,3 +8,8 @@ type NewAPIConsumerRequest struct {
 	Password  string `json:"password,omitempty"`
 	Website   string `json:"website,omitempty"`
 }
+
+type SystemLoginRequest struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+}

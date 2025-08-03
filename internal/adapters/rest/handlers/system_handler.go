@@ -14,12 +14,14 @@ import (
 type SystemHealthHandler struct {
 	system   ports.SystemServicer
 	response ports.SystemResponder
+	logger   ports.Logger
 }
 
 func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) *SystemHealthHandler {
 	handler := &SystemHealthHandler{
 		system:   ss,
 		response: response.NewHelper(log),
+		logger:   log,
 	}
 
 	return handler
@@ -41,6 +43,19 @@ func (h *SystemHealthHandler) HealthHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *SystemHealthHandler) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	data := map[string]string{"message": "login"}
+	// get the request body
+	var requestBody dto.SystemLoginRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&requestBody); err != nil {
+		h.response.BadRequestResponse(w, r, err)
+		return
+	}
+
+	h.logger.Info(r.Context(), "login attempt", ports.String("username", requestBody.Username))
+	// write headers
+	headers := http.Header{"Content-Type": []string{"application/json"}}
+	h.response.WriteJSON(w, http.StatusOK, data, headers)
 }
 
 func (h *SystemHealthHandler) NewConsumerHandler(w http.ResponseWriter, r *http.Request) {
