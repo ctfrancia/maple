@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/system"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

@@ -14,7 +14,6 @@ import (
 	"github.com/ctfrancia/maple/internal/adapters/system"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/ctfrancia/maple/internal/core/services"
-	// "github.com/ctfrancia/maple/internal/infrastructure"
 )
 
 func main() {

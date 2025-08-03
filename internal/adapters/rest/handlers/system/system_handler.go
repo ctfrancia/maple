@@ -6,22 +6,26 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/system"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/validator"
 	"github.com/ctfrancia/maple/internal/adapters/rest/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
 )
 
 type SystemHealthHandler struct {
-	system   ports.SystemServicer
-	response ports.SystemResponder
-	logger   ports.Logger
+	system    ports.SystemServicer
+	response  ports.SystemResponder
+	logger    ports.Logger
+	validator ports.ValidatorServicer
+	service   ports.SystemServicer
 }
 
 func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) *SystemHealthHandler {
 	handler := &SystemHealthHandler{
-		system:   ss,
-		response: response.NewHelper(log),
-		logger:   log,
+		system:    ss,
+		response:  response.NewResponseWriter(log),
+		logger:    log,
+		validator: validator.NewValidator(),
 	}
 
 	return handler
@@ -77,76 +81,36 @@ func (h *SystemHealthHandler) NewConsumerHandler(w http.ResponseWriter, r *http.
 	var requestBody dto.NewAPIConsumerRequest
 	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&requestBody); err != nil {
-		// badRequestResponse(w, r, err)
+		h.response.BadRequestResponse(w, r, err)
 		return
 	}
-	/*
-		// mashal the request body into a struct
-		var requestBody model.NewAPIConsumerRequest
 
-		decoder := json.NewDecoder(r.Body)
-		if err := decoder.Decode(&requestBody); err != nil {
-			app.badRequestResponse(w, r, err)
-			return
-		}
+	h.validator.Check(requestBody.Email != "", "email", "must be provided")
+	h.validator.Check(requestBody.FirstName != "", "first_name", "must be provided")
+	h.validator.Check(requestBody.LastName != "", "last_name", "must be provided")
+	h.validator.Check(requestBody.Website != "", "website", "must be provided")
+	h.validator.Check(validator.Matches(requestBody.Email, validator.EmailRX), "email", "must be a valid email address")
 
-		// Validate the request body that the required fields are present
-		v := validator.New()
-		v.Check(requestBody.Email != "", "email", "must be provided")
-		v.Check(requestBody.FirstName != "", "first_name", "must be provided")
-		v.Check(requestBody.LastName != "", "last_name", "must be provided")
-		v.Check(requestBody.Website != "", "website", "must be provided")
-		v.Check(validator.Matches(requestBody.Email, validator.EmailRX), "email", "must be a valid email address")
-		if !v.Valid() {
-			app.failedValidationResponse(w, r, v.Errors)
-			return
-		}
+	if requestBody.ClubAffiliation != "" {
+		msg := "not a valid club affiliation" // TODO: create a better message and figure out how to solve
+		h.validator.AddError("club_affiliation", msg)
+	}
+	if !h.validator.Valid() {
+		h.response.FailedValidationResponse(w, r, h.validator.ReturnErrors())
+		return
+	}
 
-		uuid := uuid.New().String()
-		// Create a new auth model
-		authModelUser := &repository.Auth{
-			UUID:      uuid,
-			Email:     requestBody.Email,
-			FirstName: requestBody.FirstName,
-			LastName:  requestBody.LastName,
-			Website:   requestBody.Website,
-		}
+	// now that the validation is completed we need to create the domain model
+	// and then pass it to the service layer for processing
+	consumer := transformNewAPIConsumerRequestToDomainModel(requestBody)
+	resp, err := h.service.CreateNewConsumer(consumer)
+	if err != nil {
+		h.response.ServerErrorResponse(w, r, err)
+		return
+	}
 
-		// check if user is in DB and password if the user is in the DB then return a 409
-		err := app.repository.Auth.SelectByEmail(authModelUser)
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			app.conflictResponse(w, r)
-			return
-		}
+	// TODO: this request needs to be sent to the service/domain layer
+	// right now it is just a placeholder
+	h.response.WriteJSON(w, http.StatusCreated, resp, nil)
 
-		generatedPW, err := auth.CreateSecretKey(auth.PasswordGeneratorDefaultLength)
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
-
-		// Hash the password
-		encodedHash, err := auth.Hash(generatedPW)
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
-
-		// Assign the argon2 hash to the user password
-		authModelUser.Password = encodedHash
-
-		// Create the user in DB
-		err = app.repository.Auth.Create(authModelUser)
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-			return
-		}
-
-		/// Return the user with the generated password
-		authModelUser.Password = generatedPW
-		err = app.writeJSON(w, http.StatusCreated, envelope{"consumer": authModelUser}, nil)
-		if err != nil {
-			app.serverErrorResponse(w, r, err)
-		}
-	*/
 }

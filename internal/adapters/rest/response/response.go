@@ -13,7 +13,7 @@ type Helper struct {
 	logger ports.Logger
 }
 
-func NewHelper(logger ports.Logger) *Helper {
+func NewResponseWriter(logger ports.Logger) *Helper {
 	return &Helper{
 		logger: logger,
 	}
