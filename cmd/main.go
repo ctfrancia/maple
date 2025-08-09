@@ -22,28 +22,30 @@ func main() {
 
 	switch env {
 	case "prod":
+		fmt.Println("using production environment")
 		log = logger.NewZapLogger(env)
 
 	case "dev", "test":
+		fmt.Println("using dev|test environment")
 		log = logger.NewZapLogger(env)
 
 	default:
 		log = logger.NewZapLogger("dev")
-		fmt.Println("This is not a production environment, using dev logger")
-		os.Exit(1)
+		fmt.Println("reached default using dev logger")
 	}
 
 	log = logger.NewZapLogger(env)
 	log.Info(context.Background(), "Starting server")
 
 	// infrastructure
-	ia := infrastructure.NewAPIInfrastructure()
+	// we don't know what these will be needed for yet
+	// ia := infrastructure.NewHTTPClientAdapter(baseURL, timeout)
 
 	// Adapters
 	sa := system.NewSystemAdapter()
 
 	// Services
-	shs := services.NewSystemHealthServicer(sa)
+	shs := services.NewSystemHealthServicer(sa, nil, nil)
 
 	// Create a new router
 	router := rest.NewRouter(log, shs)

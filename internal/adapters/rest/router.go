@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/system"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -16,11 +16,7 @@ type Router struct {
 	sysHandler ports.SystemHandler
 }
 
-<<<<<<< HEAD
-func NewRouter(ss ports.SystemServicer, logger ports.LoggerServicer) *chi.Mux {
-=======
 func NewRouter(log ports.Logger, ss ports.SystemServicer) *chi.Mux {
->>>>>>> 1277361 (create tests for infrastructure and add logging ports etc)
 	routes := &Router{
 		sysHandler: handlers.NewSystemHandler(ss, log),
 	}
@@ -52,7 +48,7 @@ func (r *Router) Routes() *chi.Mux {
 
 func printRoutes(r chi.Router) {
 	walkFunc := func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
-		route = strings.Replace(route, "/*/", "/", -1)
+		route = strings.ReplaceAll(route, "/*/", "/")
 		fmt.Printf("%-6s %s\n", method, route)
 		return nil
 	}

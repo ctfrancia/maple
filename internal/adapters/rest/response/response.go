@@ -7,14 +7,13 @@ import (
 	"net/http"
 
 	"github.com/ctfrancia/maple/internal/core/ports"
-	"go.uber.org/zap"
 )
 
 type Helper struct {
-	logger ports.LoggerServicer
+	logger ports.Logger
 }
 
-func NewHelper(logger ports.LoggerServicer) *Helper {
+func NewResponseWriter(logger ports.Logger) *Helper {
 	return &Helper{
 		logger: logger,
 	}
@@ -73,9 +72,10 @@ func (h *Helper) ConflictResponse(w http.ResponseWriter, r *http.Request) {
 
 func (h *Helper) logError(r *http.Request, err error) {
 	ctx := r.Context()
-	fields := []zap.Field{
-		zap.String("method", r.Method),
-		zap.String("uri", r.URL.RequestURI()),
-	}
-	h.logger.Error(ctx, err.Error(), fields...)
+
+	errField := ports.LogField{Key: "error", Value: err}
+	methodField := ports.LogField{Key: "method", Value: r.Method}
+	uriField := ports.LogField{Key: "uri", Value: r.RequestURI}
+
+	h.logger.Error(ctx, err.Error(), errField, methodField, uriField)
 }

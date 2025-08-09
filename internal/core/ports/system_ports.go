@@ -15,6 +15,9 @@ type SystemHandler interface {
 
 type SystemServicer interface {
 	ProcessSystemHealthRequest() domain.System
+	Login(username, password string) (any, error)
+	//CreateNewConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error)
+	NewAPIConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error)
 }
 
 type SystemAdapter interface {
@@ -29,4 +32,9 @@ type SystemResponder interface {
 	ServerErrorResponse(w http.ResponseWriter, r *http.Request, err error)
 	InvalidCredentialsResponse(w http.ResponseWriter, r *http.Request)
 	ConflictResponse(w http.ResponseWriter, r *http.Request)
+}
+
+type SystemRepository interface {
+	SelectByEmail(consumer domain.NewAPIConsumer) error
+	CreateNewConsumer(consumer domain.NewAPIConsumer) error
 }
