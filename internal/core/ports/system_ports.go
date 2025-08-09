@@ -16,7 +16,8 @@ type SystemHandler interface {
 type SystemServicer interface {
 	ProcessSystemHealthRequest() domain.System
 	Login(username, password string) (any, error)
-	CreateNewConsumer(requestBody domain.NewAPIConsumer) (any, error)
+	//CreateNewConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error)
+	NewAPIConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error)
 }
 
 type SystemAdapter interface {

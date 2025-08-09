@@ -8,10 +8,10 @@ import (
 type SystemHealthServicer struct {
 	sAdapter ports.SystemAdapter
 	repo     ports.SystemRepository
-	security ports.SecurityServicer
+	security ports.SecurityAdapter
 }
 
-func NewSystemHealthServicer(sa ports.SystemAdapter, sr ports.SystemRepository, sec ports.SecurityServicer) *SystemHealthServicer {
+func NewSystemHealthServicer(sa ports.SystemAdapter, sr ports.SystemRepository, sec ports.SecurityAdapter) ports.SystemServicer {
 	return &SystemHealthServicer{
 		sAdapter: sa,
 		repo:     sr,
@@ -34,7 +34,8 @@ func (shs *SystemHealthServicer) NewAPIConsumer(consumer domain.NewAPIConsumer) 
 	}
 
 	// Generate password
-	generatedPassword, err := shs.security.CreateSecretKey(security.PasswordGeneratorDefaultLength)
+	//	generatedPassword, err := shs.security.CreateSecretKey(security.PasswordGeneratorDefaultLength)
+	generatedPassword, err := shs.security.CreateSecretKey(domain.PasswordGeneratorDefaultLength)
 	if err != nil {
 		return domain.NewAPIConsumer{}, err
 	}
@@ -58,3 +59,9 @@ func (shs *SystemHealthServicer) NewAPIConsumer(consumer domain.NewAPIConsumer) 
 	consumer.Password = generatedPassword
 	return consumer, nil
 }
+
+/*
+func (shs *SystemHealthServicer) CreateNewConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error) {
+	return domain.NewAPIConsumer{}, nil
+}
+*/

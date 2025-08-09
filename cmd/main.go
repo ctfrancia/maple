@@ -45,7 +45,7 @@ func main() {
 	sa := system.NewSystemAdapter()
 
 	// Services
-	shs := services.NewSystemHealthServicer(sa)
+	shs := services.NewSystemHealthServicer(sa, nil, nil)
 
 	// Create a new router
 	router := rest.NewRouter(log, shs)
