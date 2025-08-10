@@ -14,7 +14,12 @@ type TournamentHandler interface {
 
 // TournamentServicer defines the interface for the business logic
 type TournamentUseCase interface {
+<<<<<<< HEAD
 	ProcessTournamentRequest() ([]domain.Tournament, error)
+=======
+	//ProcessTournamentRequest() ([]domain.Tournament, error)
+	CreateNewTournament() (domain.Tournament, error)
+>>>>>>> 3e96be3 (wip: end of day commit)
 }
 
 // TournamentRepository defines the interface for interacting with the database
