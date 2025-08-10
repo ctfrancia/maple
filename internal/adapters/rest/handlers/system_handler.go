@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/system"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/mappers"
 	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/validator"
 	"github.com/ctfrancia/maple/internal/adapters/rest/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
@@ -20,7 +21,7 @@ type SystemHealthHandler struct {
 	service   ports.SystemServicer
 }
 
-func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) *SystemHealthHandler {
+func NewSystemHandler(log ports.Logger, ss ports.SystemServicer) ports.SystemHandler {
 	handler := &SystemHealthHandler{
 		system:    ss,
 		response:  response.NewResponseWriter(log),
@@ -102,7 +103,7 @@ func (h *SystemHealthHandler) NewConsumerHandler(w http.ResponseWriter, r *http.
 
 	// now that the validation is completed we need to create the domain model
 	// and then pass it to the service layer for processing
-	consumer := transformNewAPIConsumerRequestToDomainModel(requestBody)
+	consumer := mappers.TransformNewAPIConsumerRequestToDomainModel(requestBody)
 	resp, err := h.service.CreateNewConsumer(consumer)
 	if err != nil {
 		h.response.ServerErrorResponse(w, r, err)

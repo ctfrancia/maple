@@ -1,0 +1,194 @@
+{
+    "tournaments": [
+        {
+            "id": 1,
+            "name": "Sunday Morning Chess Club",
+            "description": "Weekly chess tournament every Sunday morning",
+            "poster": "https://example.com/poster.png",
+            "schedules": [
+                {
+                    "day_of_week": 0,
+                    "start_time": "09:00",
+                    "end_time": "13:00"
+                }
+            ],
+            "tournament_start_date": "2025-08-01T00:00:00Z",
+            "tournament_end_date": "2025-12-31T00:00:00Z",
+            "location": "Carrer d'Alexandre Galí, 24, Sant Andreu, 08027 Barcelona",
+            "state": "open",
+            "prize_pool": 100,
+            "winner_id": null,
+            "creator_id": 1,
+            "player_count": 15,
+            "player_count_limit": 32,
+            "player_count_limit_enabled": true,
+            "available_slots": 17,
+            "registration_start_time": "2025-08-01T00:00:00Z",
+            "registration_end_time": "2025-12-30T23:59:59Z",
+            "enable_registration": true,
+            "enable_ranking": true,
+            "ranking_type": "glicko",
+            "created_at": "2025-08-01T00:00:00Z",
+            "updated_at": "2025-08-01T00:00:00Z"
+        },
+        {
+            "id": 2,
+            "name": "Midweek Chess Challenge",
+            "description": "Tuesday and Wednesday evening tournaments",
+            "poster": "https://example.com/poster.png",
+            "schedules": [
+                {
+                    "day_of_week": 2,
+                    "start_time": "19:00",
+                    "end_time": "22:00"
+                },
+                {
+                    "day_of_week": 3,
+                    "start_time": "19:30",
+                    "end_time": "22:30"
+                }
+            ],
+            "tournament_start_date": "2025-08-05T00:00:00Z",
+            "tournament_end_date": "2025-11-30T00:00:00Z",
+            "location": "Plaça de Catalunya, 1, Barcelona",
+            "state": "open",
+            "prize_pool": 200,
+            "winner_id": null,
+            "creator_id": 2,
+            "player_count": 8,
+            "player_count_limit": 16,
+            "player_count_limit_enabled": true,
+            "available_slots": 8,
+            "registration_start_time": "2025-08-01T00:00:00Z",
+            "registration_end_time": "2025-11-29T23:59:59Z",
+            "enable_registration": true,
+            "enable_ranking": true,
+            "ranking_type": "elo",
+            "created_at": "2025-08-01T00:00:00Z",
+            "updated_at": "2025-08-01T00:00:00Z"
+        },
+        {
+            "id": 3,
+            "name": "Weekend Warriors",
+            "description": "Alternating schedule - Monday/Friday one week, then Saturday next week",
+            "poster": "https://example.com/poster.png",
+            "schedules": [
+                {
+                    "day_of_week": 1,
+                    "start_time": "18:00",
+                    "end_time": "21:00"
+                },
+                {
+                    "day_of_week": 5,
+                    "start_time": "18:30",
+                    "end_time": "21:30"
+                },
+                {
+                    "day_of_week": 6,
+                    "start_time": "14:00",
+                    "end_time": "17:00"
+                }
+            ],
+            "tournament_start_date": "2025-08-10T00:00:00Z",
+            "tournament_end_date": "2025-10-31T00:00:00Z",
+            "location": "Parc de la Ciutadella, Barcelona",
+            "state": "open",
+            "prize_pool": 150,
+            "winner_id": null,
+            "creator_id": 3,
+            "player_count": 12,
+            "player_count_limit": 24,
+            "player_count_limit_enabled": true,
+            "available_slots": 12,
+            "registration_start_time": "2025-08-01T00:00:00Z",
+            "registration_end_time": "2025-10-30T23:59:59Z",
+            "enable_registration": true,
+            "enable_ranking": true,
+            "ranking_type": "elo",
+            "created_at": "2025-08-01T00:00:00Z",
+            "updated_at": "2025-08-01T00:00:00Z"
+        },
+        {
+            "id": 4,
+            "name": "duplicates",
+            "description": "seeing how dupicate schedules look in the calendar",
+            "poster": "https://example.com/poster.png",
+            "schedules": [
+                {
+                    "day_of_week": 1,
+                    "start_time": "18:00",
+                    "end_time": "21:00"
+                },
+                {
+                    "day_of_week": 5,
+                    "start_time": "18:30",
+                    "end_time": "21:30"
+                },
+                {
+                    "day_of_week": 6,
+                    "start_time": "14:00",
+                    "end_time": "17:00"
+                }
+            ],
+            "tournament_start_date": "2025-08-10T00:00:00Z",
+            "tournament_end_date": "2025-10-31T00:00:00Z",
+            "location": "Parc de la Ciutadella, Barcelona",
+            "state": "open",
+            "prize_pool": 150,
+            "winner_id": null,
+            "creator_id": 3,
+            "player_count": 12,
+            "player_count_limit": 24,
+            "player_count_limit_enabled": true,
+            "available_slots": 12,
+            "registration_start_time": "2025-08-01T00:00:00Z",
+            "registration_end_time": "2025-10-30T23:59:59Z",
+            "enable_registration": true,
+            "enable_ranking": true,
+            "ranking_type": "elo",
+            "created_at": "2025-08-01T00:00:00Z",
+            "updated_at": "2025-08-01T00:00:00Z"
+        },
+        {
+            "id": 5,
+            "name": "three in one day",
+            "description": "seeing how 3 tournaments in one day look",
+            "poster": "https://example.com/poster.png",
+            "schedules": [
+                {
+                    "day_of_week": 1,
+                    "start_time": "18:00",
+                    "end_time": "21:00"
+                },
+                {
+                    "day_of_week": 5,
+                    "start_time": "18:30",
+                    "end_time": "21:30"
+                },
+                {
+                    "day_of_week": 6,
+                    "start_time": "14:00",
+                    "end_time": "17:00"
+                }
+            ],
+            "tournament_start_date": "2025-08-10T00:00:00Z",
+            "tournament_end_date": "2025-10-31T00:00:00Z",
+            "location": "Parc de la Ciutadella, Barcelona",
+            "state": "open",
+            "prize_pool": 150,
+            "winner_id": null,
+            "creator_id": 3,
+            "player_count": 12,
+            "player_count_limit": 24,
+            "player_count_limit_enabled": true,
+            "available_slots": 12,
+            "registration_start_time": "2025-08-01T00:00:00Z",
+            "registration_end_time": "2025-10-30T23:59:59Z",
+            "enable_registration": true,
+            "enable_ranking": true,
+            "ranking_type": "elo",
+            "created_at": "2025-08-01T00:00:00Z",
+            "updated_at": "2025-08-01T00:00:00Z"
+        }
+    ]
+}

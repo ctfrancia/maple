@@ -13,7 +13,7 @@ import (
 	"github.com/ctfrancia/maple/internal/adapters/rest"
 	"github.com/ctfrancia/maple/internal/adapters/system"
 	"github.com/ctfrancia/maple/internal/core/ports"
-	"github.com/ctfrancia/maple/internal/core/services"
+	"github.com/ctfrancia/maple/internal/core/usecases"
 )
 
 func main() {
@@ -45,10 +45,11 @@ func main() {
 	sa := system.NewSystemAdapter()
 
 	// Services
-	shs := services.NewSystemHealthServicer(sa, nil, nil)
+	shuc := usecases.NewSystemHealthUseCase(sa, nil, nil)
+	tuc := usecases.NewTournamentUseCase()
 
 	// Create a new router
-	router := rest.NewRouter(log, shs)
+	router := rest.NewRouter(log, shuc, tuc)
 
 	srv := &http.Server{
 		Addr:         ":8080",

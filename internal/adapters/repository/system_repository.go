@@ -3,13 +3,14 @@ package repository
 
 import (
 	"github.com/ctfrancia/maple/internal/core/domain"
+	"github.com/ctfrancia/maple/internal/core/ports"
 )
 
 type SystemRepository struct {
 	db any // TODO: add the database connection it will be a gorm.DB
 }
 
-func NewSystemRepository() *SystemRepository {
+func NewSystemRepository() ports.SystemRepository {
 	return &SystemRepository{}
 }
 

@@ -1,11 +1,12 @@
-package handlers
+// Package mappers is used to map the DTOs to the domain models
+package mappers
 
 import (
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/system"
+	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto"
 	"github.com/ctfrancia/maple/internal/core/domain"
 )
 
-func transformNewAPIConsumerRequestToDomainModel(requestBody dto.NewAPIConsumerRequest) domain.NewAPIConsumer {
+func TransformNewAPIConsumerRequestToDomainModel(requestBody dto.NewAPIConsumerRequest) domain.NewAPIConsumer {
 	return domain.NewAPIConsumer{
 		FirstName:       requestBody.FirstName,
 		LastName:        requestBody.LastName,

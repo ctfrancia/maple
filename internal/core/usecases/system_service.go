@@ -1,33 +1,33 @@
-package services
+package usecases
 
 import (
 	"github.com/ctfrancia/maple/internal/core/domain"
 	"github.com/ctfrancia/maple/internal/core/ports"
 )
 
-type SystemHealthServicer struct {
+type SystemHealthUseCase struct {
 	sAdapter ports.SystemAdapter
 	repo     ports.SystemRepository
 	security ports.SecurityAdapter
 }
 
-func NewSystemHealthServicer(sa ports.SystemAdapter, sr ports.SystemRepository, sec ports.SecurityAdapter) ports.SystemServicer {
-	return &SystemHealthServicer{
+func NewSystemHealthUseCase(sa ports.SystemAdapter, sr ports.SystemRepository, sec ports.SecurityAdapter) ports.SystemServicer {
+	return &SystemHealthUseCase{
 		sAdapter: sa,
 		repo:     sr,
 		security: sec,
 	}
 }
 
-func (shs *SystemHealthServicer) ProcessSystemHealthRequest() domain.System {
+func (shs *SystemHealthUseCase) ProcessSystemHealthRequest() domain.System {
 	return shs.sAdapter.GetSystemInfo()
 }
 
-func (shs *SystemHealthServicer) Login(username, password string) (any, error) {
+func (shs *SystemHealthUseCase) Login(username, password string) (any, error) {
 	return nil, nil
 }
 
-func (shs *SystemHealthServicer) NewAPIConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error) {
+func (shs *SystemHealthUseCase) NewAPIConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error) {
 	err := shs.repo.SelectByEmail(consumer)
 	if err != nil {
 		return domain.NewAPIConsumer{}, err
@@ -60,8 +60,6 @@ func (shs *SystemHealthServicer) NewAPIConsumer(consumer domain.NewAPIConsumer) 
 	return consumer, nil
 }
 
-/*
-func (shs *SystemHealthServicer) CreateNewConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error) {
+func (shs *SystemHealthUseCase) CreateNewConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error) {
 	return domain.NewAPIConsumer{}, nil
 }
-*/
