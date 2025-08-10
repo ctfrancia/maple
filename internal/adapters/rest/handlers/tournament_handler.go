@@ -11,6 +11,7 @@ package handlers
 // this gets the tournaments within a given time range with expanded information
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/ctfrancia/maple/internal/core/ports"
@@ -30,4 +31,9 @@ func NewTournamentHandler(lg ports.Logger, uc ports.TournamentUseCase) ports.Tou
 }
 
 // GetTournamentsBasic handles the GET /tournaments_basic request
-func (h *TournamentHandler) GetTournamentsBasic(w http.ResponseWriter, r *http.Request) {}
+func (h *TournamentHandler) GetTournamentsBasic(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("GetTournamentsBasic")
+	startDate := r.URL.Query().Get("start")
+	endDate := r.URL.Query().Get("end")
+	fmt.Println("start ", startDate, " end ", endDate)
+}
