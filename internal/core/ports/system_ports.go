@@ -24,16 +24,6 @@ type SystemAdapter interface {
 	GetSystemInfo() domain.System
 }
 
-type SystemResponder interface {
-	WriteJSON(w http.ResponseWriter, status int, data any, headers http.Header) error
-	ErrorResponse(w http.ResponseWriter, r *http.Request, status int, message any)
-	FailedValidationResponse(w http.ResponseWriter, r *http.Request, errs map[string]string)
-	BadRequestResponse(w http.ResponseWriter, r *http.Request, err error)
-	ServerErrorResponse(w http.ResponseWriter, r *http.Request, err error)
-	InvalidCredentialsResponse(w http.ResponseWriter, r *http.Request)
-	ConflictResponse(w http.ResponseWriter, r *http.Request)
-}
-
 type SystemRepository interface {
 	SelectByEmail(consumer domain.NewAPIConsumer) error
 	CreateNewConsumer(consumer domain.NewAPIConsumer) error

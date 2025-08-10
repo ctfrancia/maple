@@ -14,7 +14,7 @@ type TournamentHandler interface {
 
 // TournamentServicer defines the interface for the business logic
 type TournamentUseCase interface {
-	ProcessTournamentRequest() domain.Tournament
+	ProcessTournamentRequest() ([]domain.Tournament, error)
 }
 
 // TournamentRepository defines the interface for interacting with the database

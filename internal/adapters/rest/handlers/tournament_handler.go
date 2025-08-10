@@ -18,8 +18,9 @@ import (
 )
 
 type TournamentHandler struct {
-	useCase ports.TournamentUseCase
-	logger  ports.Logger
+	useCase   ports.TournamentUseCase
+	logger    ports.Logger
+	responses ports.ResponseHelper
 }
 
 // NewTournamentHandler creates a new TournamentHandler
@@ -36,4 +37,14 @@ func (h *TournamentHandler) GetTournamentsBasic(w http.ResponseWriter, r *http.R
 	startDate := r.URL.Query().Get("start")
 	endDate := r.URL.Query().Get("end")
 	fmt.Println("start ", startDate, " end ", endDate)
+
+	tournaments, err := h.useCase.ProcessTournamentRequest()
+	if err != nil {
+		h.logger.Error(r.Context(), "Error processing tournament request", ports.Error("error", err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]any{"tournaments": tournaments}
+	h.responses.WriteJSON(w, http.StatusOK, data, nil)
 }

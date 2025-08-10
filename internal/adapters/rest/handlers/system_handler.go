@@ -15,7 +15,7 @@ import (
 
 type SystemHealthHandler struct {
 	system    ports.SystemServicer
-	response  ports.SystemResponder
+	response  ports.ResponseHelper
 	logger    ports.Logger
 	validator ports.ValidatorServicer
 	service   ports.SystemServicer

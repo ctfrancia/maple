@@ -12,6 +12,6 @@ func NewTournamentUseCase() ports.TournamentUseCase {
 	return &TournamentUseCase{}
 }
 
-func (tuc *TournamentUseCase) ProcessTournamentRequest() domain.Tournament {
-	return domain.Tournament{}
+func (tuc *TournamentUseCase) ProcessTournamentRequest() ([]domain.Tournament, error) {
+	return []domain.Tournament{}, nil
 }
