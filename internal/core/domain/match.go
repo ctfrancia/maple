@@ -8,27 +8,16 @@ import (
 
 // Match represents a match between two players
 type Match struct {
-	ID           int
-	TournamentID uuid.UUID
+	ID           int       // private
+	TournamentID uuid.UUID // public if it is linked to a tournament
+	Address      string
+	City         string
+	State        string
+	Country      string
 	Rated        bool
-	WhitePlayer  WhitePlayer
-	BlackPlayer  BlackPlayer
+	WhitePlayer  Player
+	BlackPlayer  Player
+	PGN          string // Portable Game Notation
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-}
-
-// WhitePlayer represents a player playing white
-type WhitePlayer struct {
-	ID        int
-	PublicID  uuid.UUID
-	FirstName string
-	LastName  string
-}
-
-// BlackPlayer represents a player playing black
-type BlackPlayer struct {
-	ID        int
-	PublicID  uuid.UUID
-	FirstName string
-	LastName  string
 }
