@@ -10,16 +10,35 @@ import (
 	"time"
 
 	"github.com/ctfrancia/maple/internal/adapters/logger"
+	"github.com/ctfrancia/maple/internal/adapters/repository/inmemory"
 	"github.com/ctfrancia/maple/internal/adapters/rest"
 	"github.com/ctfrancia/maple/internal/adapters/system"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/ctfrancia/maple/internal/core/services"
 )
 
+var (
+	env               = os.Getenv("ENV")
+	listenAddress     = os.Getenv("LISTEN_ADDRESS")
+	workerCount       = os.Getenv("WORKER_COUNT")
+	sigServiceTimeout = os.Getenv("SIG_SERVICE_TIMEOUT")
+)
+
 func main() {
 	var log ports.Logger
-	env := os.Getenv("ENV")
+	var tournamentRepository ports.TournamentRepository
 
+	if listenAddress == "" {
+		panic("LISTEN_ADDRESS is not set")
+	}
+	if workerCount == "" {
+		panic("WORKER_COUNT is not set")
+	}
+	if sigServiceTimeout == "" {
+		panic("SIG_SERVICE_TIMEOUT is not set")
+	}
+
+	// environment specific setup
 	switch env {
 	case "prod":
 		fmt.Println("using production environment")
@@ -28,6 +47,7 @@ func main() {
 	case "dev", "test":
 		fmt.Println("using dev|test environment")
 		log = logger.NewZapLogger(env)
+		tournamentRepository = inmemory.NewInMemoryTournamentRepository()
 
 	default:
 		log = logger.NewZapLogger("dev")
@@ -37,18 +57,19 @@ func main() {
 	log = logger.NewZapLogger(env)
 	log.Info(context.Background(), "Starting server")
 
-	// infrastructure
-	// we don't know what these will be needed for yet
-	// ia := infrastructure.NewHTTPClientAdapter(baseURL, timeout)
-
 	// Adapters
 	sa := system.NewSystemAdapter()
 
 	// Services
 	shs := services.NewSystemHealthServicer(sa, nil, nil)
+	ts, err := services.NewTournamentServicer(nil, nil)
+	if err != nil {
+		log.Error(context.Background(), "Tournament service creation failed", ports.Error("error", err))
+		os.Exit(1)
+	}
 
 	// Create a new router
-	router := rest.NewRouter(log, shs)
+	router := rest.NewRouter(log, shs, ts)
 
 	srv := &http.Server{
 		Addr:         ":8080",

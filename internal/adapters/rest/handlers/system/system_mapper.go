@@ -1,4 +1,4 @@
-package handlers
+package systemhandlers
 
 import (
 	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/system"

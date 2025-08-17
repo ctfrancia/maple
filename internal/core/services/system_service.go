@@ -1,3 +1,4 @@
+// Package services contains the services that are used by the application
 package services
 
 import (
@@ -60,8 +61,6 @@ func (shs *SystemHealthServicer) NewAPIConsumer(consumer domain.NewAPIConsumer) 
 	return consumer, nil
 }
 
-/*
 func (shs *SystemHealthServicer) CreateNewConsumer(consumer domain.NewAPIConsumer) (domain.NewAPIConsumer, error) {
 	return domain.NewAPIConsumer{}, nil
 }
-*/
