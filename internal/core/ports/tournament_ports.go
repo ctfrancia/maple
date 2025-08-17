@@ -17,6 +17,7 @@ type TournamentHandler interface {
 type TournamentServicer interface {
 	CreateTournament(ctx context.Context, tournament domain.Tournament) (domain.Tournament, error)
 	ListTournaments(ctx context.Context) ([]domain.Tournament, error)
+	FindTournament(ctx context.Context, id uuid.UUID) (domain.Tournament, error)
 }
 
 type TournamentRepository interface {
