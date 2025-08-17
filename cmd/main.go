@@ -73,7 +73,7 @@ func main() {
 
 	shs := services.NewSystemHealthServicer(sa, nil, nil)
 
-	ts, err := services.NewTournamentServicer(log, tournamentRepository, wp) // ✅ Pass wp, not nil
+	ts, err := services.NewTournamentServicer(log, tournamentRepository, wp)
 	if err != nil {
 		log.Error(context.Background(), "Tournament service creation failed", ports.Error("error", err))
 		os.Exit(1)
