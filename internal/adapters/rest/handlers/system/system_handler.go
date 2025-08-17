@@ -1,6 +1,5 @@
-// package system handlers within this package are for the system, this means the apiconsumers
-// the ones that can consume the api
-package handlers
+// Package systemhandlers are the handlers for the system api
+package systemhandlers
 
 import (
 	"encoding/json"
@@ -20,7 +19,7 @@ type SystemHealthHandler struct {
 	service   ports.SystemServicer
 }
 
-func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) *SystemHealthHandler {
+func NewSystemHandler(ss ports.SystemServicer, log ports.Logger) ports.SystemHandler {
 	handler := &SystemHealthHandler{
 		system:    ss,
 		response:  response.NewResponseWriter(log),
@@ -112,5 +111,4 @@ func (h *SystemHealthHandler) NewConsumerHandler(w http.ResponseWriter, r *http.
 	// TODO: this request needs to be sent to the service/domain layer
 	// right now it is just a placeholder
 	h.response.WriteJSON(w, http.StatusCreated, resp, nil)
-
 }
