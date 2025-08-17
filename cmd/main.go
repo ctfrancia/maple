@@ -37,17 +37,25 @@ func main() {
 		panic("SIG_SERVICE_TIMEOUT is not set")
 	}
 
+	// Parse timeout first
+	timeout, err := time.ParseDuration(sigServiceTimeout)
+	if err != nil {
+		panic(err)
+	}
+
+	// Create main application context
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// environment specific setup
 	switch env {
 	case "prod":
 		fmt.Println("using production environment")
 		log = logger.NewZapLogger(env)
-
 	case "dev", "test":
 		fmt.Println("using dev|test environment")
 		log = logger.NewZapLogger(env)
 		tournamentRepository = inmemory.NewInMemoryTournamentRepository()
-
 	default:
 		log = logger.NewZapLogger("dev")
 		fmt.Println("reached default using dev logger")
@@ -58,9 +66,14 @@ func main() {
 	// Adapters
 	sa := system.NewSystemAdapter()
 
-	// Services
+	// Services - use the main context
+	wp := services.NewTournamentWorkerPool(ctx, cancel)
+	wp.Start()
+	defer wp.Stop()
+
 	shs := services.NewSystemHealthServicer(sa, nil, nil)
-	ts, err := services.NewTournamentServicer(log, tournamentRepository, nil)
+
+	ts, err := services.NewTournamentServicer(log, tournamentRepository, wp) // ✅ Pass wp, not nil
 	if err != nil {
 		log.Error(context.Background(), "Tournament service creation failed", ports.Error("error", err))
 		os.Exit(1)
@@ -68,9 +81,8 @@ func main() {
 
 	// Create a new router
 	router := rest.NewRouter(log, shs, ts)
-
 	srv := &http.Server{
-		Addr:         ":8080",
+		Addr:         listenAddress,
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -83,22 +95,32 @@ func main() {
 
 	// Start server in a goroutine so it doesn't block
 	go func() {
-		log.Info(context.Background(), "Server starting on :8080")
+		log.Info(context.Background(), fmt.Sprintf("Server starting on %s", listenAddress))
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Error(context.Background(), "Failed to start server", ports.Error("error", err))
-			os.Exit(1)
+			cancel()
 		}
 	}()
 
-	<-quit
+	// Wait for either shutdown signal or context cancellation
+	select {
+	case <-quit:
+		log.Info(context.Background(), "Shutdown signal received")
+	case <-ctx.Done():
+		log.Info(context.Background(), "Context cancelled, shutting down")
+	}
+
 	log.Info(context.Background(), "Shutting down server...")
 
-	// Creates a deadline for shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
+	// Cancel the main context to signal all services to stop
+	cancel()
+
+	// Creates a deadline for shutdown (use the parsed timeout)
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), timeout)
+	defer shutdownCancel()
 
 	// Attempt graceful shutdown
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := srv.Shutdown(shutdownCtx); err != nil {
 		log.Error(context.Background(), "Server forced to shutdown", ports.Error("error", err))
 		os.Exit(1)
 	}
