@@ -18,16 +18,15 @@ import (
 )
 
 var (
-	env               = os.Getenv("ENV")
-	listenAddress     = os.Getenv("LISTEN_ADDRESS")
-	workerCount       = os.Getenv("WORKER_COUNT")
-	sigServiceTimeout = os.Getenv("SIG_SERVICE_TIMEOUT")
+	env                  = os.Getenv("ENV")
+	listenAddress        = os.Getenv("LISTEN_ADDRESS")
+	workerCount          = os.Getenv("WORKER_COUNT")
+	sigServiceTimeout    = os.Getenv("SIG_SERVICE_TIMEOUT")
+	log                  ports.Logger
+	tournamentRepository ports.TournamentRepository
 )
 
 func main() {
-	var log ports.Logger
-	var tournamentRepository ports.TournamentRepository
-
 	if listenAddress == "" {
 		panic("LISTEN_ADDRESS is not set")
 	}
@@ -54,7 +53,6 @@ func main() {
 		fmt.Println("reached default using dev logger")
 	}
 
-	log = logger.NewZapLogger(env)
 	log.Info(context.Background(), "Starting server")
 
 	// Adapters
@@ -62,7 +60,7 @@ func main() {
 
 	// Services
 	shs := services.NewSystemHealthServicer(sa, nil, nil)
-	ts, err := services.NewTournamentServicer(nil, nil)
+	ts, err := services.NewTournamentServicer(log, tournamentRepository, nil)
 	if err != nil {
 		log.Error(context.Background(), "Tournament service creation failed", ports.Error("error", err))
 		os.Exit(1)

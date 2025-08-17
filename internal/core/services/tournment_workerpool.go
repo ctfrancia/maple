@@ -50,11 +50,11 @@ type CreateTournamentTask struct {
 }
 
 type FindTournamentTask struct {
-	TournamentID string
+	TournamentID uuid.UUID
 }
 
 type ListTournamentsTask struct {
-	Tournaments []domain.Tournament
+	// Tournaments []domain.Tournament update for params
 }
 
 func NewTournamentWorkerPool(ctx context.Context, cancel context.CancelFunc) *TournamentWorkerPool {
@@ -89,11 +89,16 @@ func (twp *TournamentWorkerPool) worker() {
 			case TaskTypeCreateTournament:
 				result := twp.createTournament(task)
 				task.ResultCh <- result
+
 			case TaskTypeFindTournament:
-				// twp.findTournament(task)
+				result := twp.findTournament(task)
+				task.ResultCh <- result
+
 			case TaskTypeListTournaments:
-				// twp.listTournaments(task)
+				result := twp.listTournaments(task)
+				task.ResultCh <- result
 			}
+
 		case <-twp.ctx.Done():
 			twp.wg.Done()
 			return // Context's Done() called, so we can close the worker
@@ -132,13 +137,39 @@ func (twp *TournamentWorkerPool) createTournament(task TournamentTask) TaskResul
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
 
-	fmt.Printf("task %#v", t)
 	result, err := task.Repository.CreateTournament(t.Tournament)
 	if err != nil {
-		// task.ResultCh <- TaskResult{Error: err}
 		return TaskResult{Error: err}
 	}
 
-	// task.ResultCh <- TaskResult{Data: result}
 	return TaskResult{Data: result}
+}
+
+func (twp *TournamentWorkerPool) findTournament(task TournamentTask) TaskResult {
+	t, ok := task.Data.(FindTournamentTask)
+	if !ok {
+		return TaskResult{Error: fmt.Errorf("invalid task data")}
+	}
+
+	result, err := task.Repository.FindTournament(t.TournamentID)
+	if err != nil {
+		return TaskResult{Error: err}
+	}
+
+	return TaskResult{Data: result}
+}
+
+func (twp *TournamentWorkerPool) listTournaments(task TournamentTask) TaskResult {
+	_, ok := task.Data.(ListTournamentsTask)
+	if !ok {
+		task.ResultCh <- TaskResult{Error: fmt.Errorf("invalid task data")}
+		return TaskResult{Error: fmt.Errorf("invalid task data")}
+	}
+
+	results, err := task.Repository.ListTournaments(nil)
+	if err != nil {
+		return TaskResult{Error: err}
+	}
+
+	return TaskResult{Data: results}
 }

@@ -27,7 +27,6 @@ func NewTournamentServicer(log ports.Logger, tr ports.TournamentRepository, wp *
 	if wp == nil {
 		return nil, fmt.Errorf("tournament worker pool is required")
 	}
-	fmt.Println("creating service", tr)
 	return &TournamentServicer{
 		logger:     log,
 		repository: tr,
@@ -36,9 +35,6 @@ func NewTournamentServicer(log ports.Logger, tr ports.TournamentRepository, wp *
 }
 
 func (ts *TournamentServicer) CreateTournament(ctx context.Context, tournament domain.Tournament) (domain.Tournament, error) {
-	if ts.repository == nil {
-		return domain.Tournament{}, fmt.Errorf("tournament repository is required")
-	}
 	task := TournamentTask{
 		ID:         uuid.New(),
 		Type:       TaskTypeCreateTournament,
@@ -48,7 +44,6 @@ func (ts *TournamentServicer) CreateTournament(ctx context.Context, tournament d
 		Context:    ctx,
 	}
 
-	fmt.Printf("\n\n submitting task %#v", task)
 	resultCh := ts.workerPool.SubmitTask(task)
 
 	select {
@@ -61,5 +56,30 @@ func (ts *TournamentServicer) CreateTournament(ctx context.Context, tournament d
 
 	case <-ctx.Done():
 		return domain.Tournament{}, ctx.Err()
+	}
+}
+
+func (ts *TournamentServicer) ListTournaments(ctx context.Context) ([]domain.Tournament, error) {
+	task := TournamentTask{
+		ID:         uuid.New(),
+		Type:       TaskTypeListTournaments,
+		Data:       ListTournamentsTask{},
+		Repository: ts.repository,
+		ResultCh:   make(chan TaskResult, 1),
+		Context:    ctx,
+	}
+
+	resultCh := ts.workerPool.SubmitTask(task)
+
+	select {
+	case result := <-resultCh:
+		if result.Error != nil {
+			// error handling here
+			return nil, result.Error
+		}
+		return result.Data.([]domain.Tournament), nil
+
+	case <-ctx.Done():
+		return nil, ctx.Err()
 	}
 }
