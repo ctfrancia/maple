@@ -31,4 +31,4 @@ Contributions are what make the open source community such an amazing place to l
 
 Read the [CONTRIBUTING.md](https://github.com/ctfrancia/maple/blob/main/CONTRIBUTING.md) file for more details
 If you find this API helpful, consider buying me a coffee!
-[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/yourusername)
+[![Buy Me A Coffee](https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png)](https://www.buymeacoffee.com/)
