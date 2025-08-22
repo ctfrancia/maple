@@ -56,6 +56,7 @@ func main() {
 		fmt.Println("using dev|test environment")
 		log = logger.NewZapLogger(env)
 		tournamentRepository = inmemory.NewInMemoryTournamentRepository()
+		// tProvider = repository.NewTournamentProvider(tournamentRepository)
 	default:
 		log = logger.NewZapLogger("dev")
 		fmt.Println("reached default using dev logger")

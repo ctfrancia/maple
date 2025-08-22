@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"fmt"
+	//"fmt"
 
 	// "github.com/ctfrancia/maple/internal/adapters/repository/inmemory"
 	"github.com/ctfrancia/maple/internal/core/domain"
@@ -18,15 +18,6 @@ type TournamentServicer struct {
 }
 
 func NewTournamentServicer(log ports.Logger, tr ports.TournamentRepository, wp *TournamentWorkerPool) (ports.TournamentServicer, error) {
-	if log == nil {
-		return nil, fmt.Errorf("logger is required")
-	}
-	if tr == nil {
-		return nil, fmt.Errorf("tournament repository is required")
-	}
-	if wp == nil {
-		return nil, fmt.Errorf("tournament worker pool is required")
-	}
 	return &TournamentServicer{
 		logger:     log,
 		repository: tr,

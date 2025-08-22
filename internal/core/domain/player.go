@@ -15,7 +15,7 @@ type Player struct {
 	FirstName       string
 	LastName        string
 	Website         string
-	ClubAffiliation string
+	ClubAffiliation Club
 	FIDE            Fide
 	Regional        Regional
 }

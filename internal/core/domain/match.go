@@ -8,9 +8,11 @@ import (
 
 // Match represents a match between two players
 type Match struct {
-	ID           int       // private
-	TournamentID uuid.UUID // public if it is linked to a tournament
-	Address      string
+	ID           int // private
+	UUID         uuid.UUID
+	TournamentID Tournament
+	Winner       Player
+	Location     Location
 	City         string
 	State        string
 	Country      string

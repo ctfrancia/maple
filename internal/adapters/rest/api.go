@@ -41,6 +41,19 @@ func (r *Router) Routes() *chi.Mux {
 			v1s.Post("/login", r.sysHandler.LoginHandler)
 			v1s.Post("/new-consumer", r.sysHandler.NewConsumerHandler)
 		})
+		v1.Route("/tournament", func(v1t chi.Router) {
+			// v1t.Get("/tournaments", r.tournamentHandler.GetTournamentsHandler)
+			v1t.Post("/new", r.tournamentHandler.CreateTournamentHandler)
+			// v1t.Post("/tournaments", r.tournamentHandler.CreateTournamentHandler)
+			// v1t.Put("/tournaments/{id}", r.tournamentHandler.UpdateTournamentHandler)
+			// v1t.Delete("/tournaments/{id}", r.tournamentHandler.DeleteTournamentHandler)
+		})
+		v1.Route("/match", func(v1m chi.Router) {
+			// v1m.Get("/matches", r.matchHandler.GetMatchesHandler)
+			// v1m.Post("/matches", r.tournamentHandler.CreateMatchHandler)
+			// v1m.Put("/matches/{id}", r.matchHandler.UpdateMatchHandler)
+			// v1m.Delete("/matches/{id}", r.matchHandler.DeleteMatchHandler)
+		})
 	})
 
 	// TODO: should only print if not in production
