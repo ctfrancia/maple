@@ -29,6 +29,13 @@ const (
 	PairingMethodRoundRobin PairingMethod = "round_robin"
 )
 
+type RegistrationStatus string
+
+const (
+	RegistrationStatusOpen   RegistrationStatus = "open"
+	RegistrationStatusClosed RegistrationStatus = "closed"
+)
+
 type Tournament struct {
 	ID                 int       // private
 	PublicID           uuid.UUID // this is the public ID
@@ -39,14 +46,18 @@ type Tournament struct {
 	OpenToSpectators   bool
 	OpenToRegistration bool
 	Registration       Registration
+	Arbitrator         string
 	PairingMethod      PairingMethod
 	Matches            []Match
-	Players            []Player
-	NumberOfPlayers    int
+	Players            []Player // no more no less than 2 white/black
+	NumberOfPlayers    int      // how many are participating
 	Schedule           []Schedule
+	Results            []Result
 	Status             TournamentStatus
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
+	SoftDeletedAt      time.Time
+	DeletedAt          time.Time
 }
 
 type Schedule struct {
@@ -55,23 +66,29 @@ type Schedule struct {
 }
 
 type Registration struct {
+	Status    RegistrationStatus
 	StartTime time.Time
 	EndTime   time.Time
-	Fee       float64
-	PrizePool float64
+	Fee       int64
+	PrizePool int64
 	Payment   Payment
 }
 
 type Payment struct {
 	Currency      string
-	AmountFirst   float64
-	AmountSecond  float64
-	AmountThird   float64
-	AmountFourth  float64
-	AmountFifth   float64
-	AmountSixth   float64
-	AmountSeventh float64
-	AmountEighth  float64
-	AmountNinth   float64
-	AmountTenth   float64
+	AmountFirst   int64
+	AmountSecond  int64
+	AmountThird   int64
+	AmountFourth  int64
+	AmountFifth   int64
+	AmountSixth   int64
+	AmountSeventh int64
+	AmountEighth  int64
+	AmountNinth   int64
+	AmountTenth   int64
+}
+
+type Result struct {
+	PlayerID Player
+	Prize    int64
 }
