@@ -14,6 +14,7 @@ type TournamentStatus string
 
 const (
 	TournamentStatusActive    TournamentStatus = "active"
+	TournamentStatusDraft     TournamentStatus = "draft"
 	TournamentStatusInactive  TournamentStatus = "inactive"
 	TournamentStatusSuspended TournamentStatus = "suspended"
 	TournamentStatusPending   TournamentStatus = "pending"
@@ -41,6 +42,8 @@ type Tournament struct {
 	PublicID           uuid.UUID // this is the public ID
 	Name               string
 	Location           string // address or location
+	Creator            Player
+	Contact            Contact
 	Description        string
 	OpenToPublic       bool
 	OpenToSpectators   bool
@@ -91,4 +94,10 @@ type Payment struct {
 type Result struct {
 	PlayerID Player
 	Prize    int64
+}
+
+type Contact struct {
+	Name  string
+	Email string
+	Phone string
 }

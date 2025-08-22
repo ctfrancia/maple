@@ -55,7 +55,6 @@ type FindTournamentTask struct {
 }
 
 type ListTournamentsTask struct {
-	// Tournaments []domain.Tournament update for params
 }
 
 func NewTournamentWorkerPool(ctx context.Context, cancel context.CancelFunc) *TournamentWorkerPool {
@@ -86,13 +85,17 @@ func (twp *TournamentWorkerPool) worker() {
 		select {
 		case task := <-twp.taskQueue:
 			var result TaskResult
+
 			switch task.Type {
 			case TaskTypeCreateTournament:
 				result = twp.createTournament(task)
+
 			case TaskTypeFindTournament:
 				result = twp.findTournament(task)
+
 			case TaskTypeListTournaments:
 				result = twp.listTournaments(task)
+
 			default:
 				result = TaskResult{Error: fmt.Errorf("invalid task type")}
 			}
@@ -171,6 +174,7 @@ func (twp *TournamentWorkerPool) findTournament(task TournamentTask) TaskResult 
 	if !ok {
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
+
 	err = task.Repository.ReadTx(func(repo ports.TournamentRepository) error {
 		result, err = repo.FindTournament(t.TournamentID)
 		if err != nil {
@@ -191,7 +195,6 @@ func (twp *TournamentWorkerPool) listTournaments(task TournamentTask) TaskResult
 	var err error
 	_, ok := task.Data.(ListTournamentsTask)
 	if !ok {
-		//task.ResultCh <- TaskResult{Error: fmt.Errorf("invalid task data")}
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
 

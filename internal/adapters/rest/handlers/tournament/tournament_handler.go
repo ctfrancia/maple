@@ -35,23 +35,22 @@ func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *ht
 		h.response.ErrorResponse(w, r, http.StatusBadRequest, err)
 		return
 	}
-	// TODO: validate request
-	// h.logger.Info(r.Context(), "create tournament request received", createTournamentRequest)
-	isValidRequest := isValidRequest(createTournamentRequest)
+
+	isValidRequest, err := isValidRequest(createTournamentRequest)
 	if !isValidRequest {
 		h.response.FailedValidationResponse(w, r, h.validator.ReturnErrors())
 		return
 	}
 	tournament := mapTournamentToDomain(createTournamentRequest)
 
-	tournament, err := h.service.CreateTournament(r.Context(), tournament)
+	result, err := h.service.CreateTournament(r.Context(), tournament)
 	if err != nil {
 		h.response.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	// Successful response
-	h.response.WriteJSON(w, http.StatusCreated, tournament, nil)
+	h.response.WriteJSON(w, http.StatusCreated, result, nil)
 }
 
 func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http.Request) {
