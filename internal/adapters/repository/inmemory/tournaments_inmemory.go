@@ -14,8 +14,10 @@ type InMemoryTournamentRepository struct {
 	tournaments map[uuid.UUID]domain.Tournament
 }
 
-func NewInMemoryTournamentRepository(repository InMemoryTournamentRepository) ports.TournamentRepository {
-	return &InMemoryTournamentRepository{}
+func NewInMemoryTournamentRepository() ports.TournamentRepository {
+	return &InMemoryTournamentRepository{
+		tournaments: make(map[uuid.UUID]domain.Tournament),
+	}
 }
 
 func (ir *InMemoryTournamentRepository) CreateTournament(tournament domain.Tournament) (domain.Tournament, error) {

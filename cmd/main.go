@@ -22,11 +22,16 @@ var (
 	listenAddress        = os.Getenv("LISTEN_ADDRESS")
 	workerCount          = os.Getenv("WORKER_COUNT")
 	sigServiceTimeout    = os.Getenv("SIG_SERVICE_TIMEOUT")
+	readTimeout          = os.Getenv("READ_TIMEOUT")
+	writeTimeout         = os.Getenv("WRITE_TIMEOUT")
+	idleTimeout          = os.Getenv("IDLE_TIMEOUT")
 	log                  ports.Logger
 	tournamentRepository ports.TournamentRepository
+	repoProvider         ports.TournamentRepositoryProvider
 )
 
 func main() {
+	var rt, wt, it time.Duration
 	if listenAddress == "" {
 		panic("LISTEN_ADDRESS is not set")
 	}
@@ -56,7 +61,10 @@ func main() {
 		fmt.Println("using dev|test environment")
 		log = logger.NewZapLogger(env)
 		tournamentRepository = inmemory.NewInMemoryTournamentRepository()
-		// tProvider = repository.NewTournamentProvider(tournamentRepository)
+		repoProvider = inmemory.NewTournamentRepositoryProvider(tournamentRepository)
+		rt = 15 * time.Second
+		wt = 15 * time.Second
+		it = 60 * time.Second
 	default:
 		log = logger.NewZapLogger("dev")
 		fmt.Println("reached default using dev logger")
@@ -71,10 +79,9 @@ func main() {
 	wp := services.NewTournamentWorkerPool(ctx, cancel)
 	wp.Start()
 	defer wp.Stop()
-
 	shs := services.NewSystemHealthServicer(sa, nil, nil)
 
-	ts, err := services.NewTournamentServicer(log, tournamentRepository, wp)
+	ts, err := services.NewTournamentServicer(log, repoProvider, wp)
 	if err != nil {
 		log.Error(context.Background(), "Tournament service creation failed", ports.Error("error", err))
 		os.Exit(1)
@@ -85,9 +92,9 @@ func main() {
 	srv := &http.Server{
 		Addr:         listenAddress,
 		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		ReadTimeout:  rt,
+		WriteTimeout: wt,
+		IdleTimeout:  it,
 	}
 
 	// Channel to listen for interrupt signal to trigger shutdown

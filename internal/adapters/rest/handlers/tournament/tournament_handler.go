@@ -32,15 +32,16 @@ func NewTournamentHandler(log ports.Logger, ts ports.TournamentServicer) ports.T
 func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	var createTournamentRequest dto.CreateTournamentRequest
 	if err := json.NewDecoder(r.Body).Decode(&createTournamentRequest); err != nil {
-		h.response.ErrorResponse(w, r, http.StatusBadRequest, err)
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, "invalid body")
 		return
 	}
 
-	isValidRequest, err := isValidRequest(createTournamentRequest)
-	if !isValidRequest {
-		h.response.FailedValidationResponse(w, r, h.validator.ReturnErrors())
-		return
+	v := validator.NewValidator()
+	v.Check(createTournamentRequest.Name != "", "name", "name is required")
+	if !v.Valid() {
+		h.response.FailedValidationResponse(w, r, v.ReturnErrors())
 	}
+
 	tournament := mapTournamentToDomain(createTournamentRequest)
 
 	result, err := h.service.CreateTournament(r.Context(), tournament)
@@ -49,8 +50,13 @@ func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *ht
 		return
 	}
 
+	resp := mapTournamentToDto(result)
+	env := map[string]dto.Tournament{
+		"tournament": resp,
+	}
+
 	// Successful response
-	h.response.WriteJSON(w, http.StatusCreated, result, nil)
+	h.response.WriteJSON(w, http.StatusCreated, env, nil)
 }
 
 func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http.Request) {

@@ -40,7 +40,7 @@ type TournamentTask struct {
 	Type       TaskType
 	Data       any // will be converted to a specific task type in handler
 	ResultCh   chan TaskResult
-	Repository ports.TournamenRepositoryProvider //ports.TournamentRepository
+	Repository ports.TournamentRepositoryProvider
 
 	Context context.Context
 }

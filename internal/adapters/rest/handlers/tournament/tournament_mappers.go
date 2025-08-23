@@ -11,3 +11,73 @@ func mapTournamentToDomain(t dto.CreateTournamentRequest) domain.Tournament {
 		Name: t.Name,
 	}
 }
+
+func mapTournamentToDto(t domain.Tournament) dto.Tournament {
+	return dto.Tournament{
+		ID:                 t.PublicID.String(),
+		Name:               t.Name,
+		Description:        t.Description,
+		Location:           mapLocationToDto(t.Location),
+		OpenToPublic:       t.OpenToPublic,
+		OpenToSpectators:   t.OpenToSpectators,
+		OpenToRegistration: t.OpenToRegistration,
+		Registration:       mapRegistrationToDto(t.Registration),
+		Arbitrator:         t.Arbitrator,
+		Matches:            nil,
+		Players:            nil,
+		NumberOfPlayers:    t.NumberOfPlayers,
+		Schedule:           mapScheduleToDto(t.Schedule),
+		Results:            nil, // results should be already mapped when creating tournament
+		Status:             dto.TournamentStatus(t.Status),
+	}
+}
+
+func mapLocationToDto(l domain.Location) dto.Location {
+	return dto.Location{
+		Address:    l.Address,
+		PostalCode: l.PostalCode,
+		City:       l.City,
+		State:      l.State,
+		Country:    l.Country,
+		//Name:       l.Name,
+		//County:     l.County,
+		//Province:   l.Province,
+		//Latitude:   l.Latitude,
+		//Longitude:  l.Longitude,
+		// Timezone: domain.TimezoneUTC,
+	}
+}
+
+func mapScheduleToDto(sch []domain.Schedule) []dto.Schedule {
+	xSch := make([]dto.Schedule, len(sch))
+	for i, s := range xSch {
+		xSch[i] = dto.Schedule{
+			StartTime: s.StartTime,
+			EndTime:   s.EndTime,
+		}
+	}
+	return xSch
+}
+
+func mapRegistrationToDto(r domain.Registration) dto.Registration {
+	return dto.Registration{
+		Status:    dto.RegistrationStatus(r.Status),
+		StartTime: r.StartTime,
+		EndTime:   r.EndTime,
+		Fee:       r.Fee,
+		PrizePool: r.PrizePool,
+		Payment:   mapRegistrationPayoutToDto(r.Payment),
+	}
+}
+
+func mapRegistrationPayoutToDto(p []domain.Payment) []dto.Payment {
+	xPayout := make([]dto.Payment, len(p))
+	for i, s := range xPayout {
+		xPayout[i] = dto.Payment{
+			Place:  s.Place,
+			Amount: s.Amount,
+			Other:  s.Other,
+		}
+	}
+	return xPayout
+}

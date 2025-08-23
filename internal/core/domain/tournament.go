@@ -41,7 +41,7 @@ type Tournament struct {
 	ID                 int       // private
 	PublicID           uuid.UUID // this is the public ID
 	Name               string
-	Location           string // address or location
+	Location           Location // address or location
 	Creator            Player
 	Contact            Contact
 	Description        string
@@ -74,21 +74,21 @@ type Registration struct {
 	EndTime   time.Time
 	Fee       int64
 	PrizePool int64
-	Payment   Payment
+	Payment   []Payment
 }
 
+type PaymentType string
+
+const (
+	PaymentTypeMonetary PaymentType = "monetary" //money
+	PaymentTypePhysical PaymentType = "physical" // e.g. book/lesson/etc.
+	PaymentTypeOther    PaymentType = "other"
+)
+
 type Payment struct {
-	Currency      string
-	AmountFirst   int64
-	AmountSecond  int64
-	AmountThird   int64
-	AmountFourth  int64
-	AmountFifth   int64
-	AmountSixth   int64
-	AmountSeventh int64
-	AmountEighth  int64
-	AmountNinth   int64
-	AmountTenth   int64
+	Place  int   // 1st, 2nd, etc.
+	Amount int64 // if type is monetary
+	Type   PaymentType
 }
 
 type Result struct {
