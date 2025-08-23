@@ -23,7 +23,7 @@ type TournamentHandler interface {
 type TournamentServicer interface {
 	CreateTournament(ctx context.Context, tournament commands.CreateTournamentCommand) (domain.Tournament, error)
 	ListTournaments(ctx context.Context) ([]domain.Tournament, error)
-	FindTournament(ctx context.Context, id uuid.UUID) (domain.Tournament, error)
+	FindTournament(ctx context.Context, cmd commands.FindTournamentCommand) (domain.Tournament, error)
 }
 
 // TournamentRepository  is for our persistence layer
@@ -35,4 +35,5 @@ type TournamentRepository interface {
 
 type TournamentMapper interface {
 	MapToCommand(dto dto.CreateTournamentRequest) commands.CreateTournamentCommand
+	MapToFindCommand(ID uuid.UUID) commands.FindTournamentCommand
 }

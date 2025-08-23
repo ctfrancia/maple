@@ -2,7 +2,6 @@
 package commands
 
 import (
-	"fmt"
 	"strings"
 	"time"
 )
@@ -52,24 +51,6 @@ type Contact struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Phone string `json:"phone"`
-}
-
-// ValidationError represents multiple field validation errors
-type ValidationError struct {
-	Errors map[string]string `json:"errors"`
-}
-
-func (ve ValidationError) Error() string {
-	if len(ve.Errors) == 0 {
-		return "validation failed"
-	}
-
-	var messages []string
-	for field, msg := range ve.Errors {
-		messages = append(messages, fmt.Sprintf("%s: %s", field, msg))
-	}
-
-	return fmt.Sprintf("validation failed: %s", strings.Join(messages, ", "))
 }
 
 // Validate is where we handle the validation of the command

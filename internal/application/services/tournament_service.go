@@ -74,11 +74,11 @@ func (ts *TournamentServicer) ListTournaments(ctx context.Context) ([]domain.Tou
 	}
 }
 
-func (ts *TournamentServicer) FindTournament(ctx context.Context, id uuid.UUID) (domain.Tournament, error) {
+func (ts *TournamentServicer) FindTournament(ctx context.Context, cmd commands.FindTournamentCommand) (domain.Tournament, error) {
 	task := TournamentTask{
 		ID:         uuid.New(),
 		Type:       TaskTypeFindTournament,
-		Data:       FindTournamentTask{TournamentID: id},
+		Data:       FindTournamentTask{TournamentID: cmd.ID},
 		Repository: ts.repository,
 		ResultCh:   make(chan TaskResult, 1),
 		Context:    ctx,

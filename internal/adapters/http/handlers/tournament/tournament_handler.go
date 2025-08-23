@@ -10,9 +10,9 @@ import (
 	"github.com/ctfrancia/maple/internal/adapters/http/handlers/validator"
 	"github.com/ctfrancia/maple/internal/adapters/http/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
-	"github.com/google/uuid"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type TournamentHandler struct {
@@ -72,19 +72,22 @@ func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *ht
 
 // FindTournamentHandler is the entrypoint for finding a tournament
 func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	tournamentID := strings.TrimSpace(chi.URLParam(r, "id"))
-	if tournamentID == "" {
+	tournamentIDStr := strings.TrimSpace(chi.URLParam(r, "id"))
+	if tournamentIDStr == "" {
 		h.response.ErrorResponse(w, r, http.StatusBadRequest, "id is required")
 		return
 	}
 
-	id, err := uuid.Parse(tournamentID)
+	// Parse and validate the UUID here - fail fast
+	ID, err := uuid.Parse(tournamentIDStr)
 	if err != nil {
-		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, "invalid tournament ID format")
 		return
 	}
 
-	result, err := h.service.FindTournament(r.Context(), id)
+	cmd := h.mapper.MapToFindCommand(ID)
+
+	result, err := h.service.FindTournament(r.Context(), cmd)
 	if err != nil {
 		h.response.ServerErrorResponse(w, r, err)
 		return

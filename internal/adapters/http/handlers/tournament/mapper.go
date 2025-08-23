@@ -4,6 +4,7 @@ import (
 	dto "github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
 	commands "github.com/ctfrancia/maple/internal/application/commands/tournament"
 	"github.com/ctfrancia/maple/internal/core/domain"
+	"github.com/google/uuid"
 )
 
 type TournamentMapper struct{}
@@ -16,6 +17,12 @@ func (m TournamentMapper) MapToCommand(dto dto.CreateTournamentRequest) commands
 	return commands.CreateTournamentCommand{
 		Name:     dto.Name,
 		Schedule: mapScheduleToCommand(dto.Schedule),
+	}
+}
+
+func (m TournamentMapper) MapToFindCommand(ID uuid.UUID) commands.FindTournamentCommand {
+	return commands.FindTournamentCommand{
+		ID: ID,
 	}
 }
 
@@ -100,7 +107,7 @@ func mapRegistrationToDto(r domain.Registration) dto.Registration {
 		Status:    dto.RegistrationStatus(r.Status),
 		StartTime: r.StartTime,
 		EndTime:   r.EndTime,
-		Fee:       r.Fee,
+		// Fee:       r.Fee,
 		PrizePool: r.PrizePool,
 		Payment:   mapRegistrationPayoutToDto(r.Payment),
 	}
