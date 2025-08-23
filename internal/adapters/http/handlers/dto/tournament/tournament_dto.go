@@ -6,7 +6,8 @@ import (
 )
 
 type CreateTournamentRequest struct {
-	Name string `json:"name"`
+	Name     string     `json:"name"`
+	Schedule []Schedule `json:"schedule,omitempty"`
 }
 
 type TournamentStatus string
@@ -20,7 +21,7 @@ const (
 	TournamentStatusCompleted TournamentStatus = "completed"
 )
 
-type Tournament struct {
+type TournamentResponse struct {
 	ID                 string           `json:"id"` // public uuid
 	Name               string           `json:"name"`
 	Location           Location         `json:"location"`

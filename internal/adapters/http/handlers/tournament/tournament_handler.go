@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
+	dto "github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
 	"github.com/ctfrancia/maple/internal/adapters/http/handlers/validator"
 	"github.com/ctfrancia/maple/internal/adapters/http/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
-	"github.com/google/uuid"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type TournamentHandler struct {
@@ -20,6 +20,7 @@ type TournamentHandler struct {
 	response  ports.SystemResponder
 	logger    ports.Logger
 	validator ports.ValidatorServicer
+	mapper    ports.TournamentMapper
 }
 
 func NewTournamentHandler(log ports.Logger, ts ports.TournamentServicer) ports.TournamentHandler {
@@ -28,6 +29,7 @@ func NewTournamentHandler(log ports.Logger, ts ports.TournamentServicer) ports.T
 		response:  response.NewResponseWriter(log),
 		logger:    log,
 		validator: validator.NewValidator(),
+		mapper:    NewTournamentMapper(),
 	}
 
 	return handler
@@ -35,28 +37,32 @@ func NewTournamentHandler(log ports.Logger, ts ports.TournamentServicer) ports.T
 
 // CreateTournamentHandler is the entrypoint for creating a tournament
 func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	var createTournamentRequest dto.CreateTournamentRequest
-	if err := json.NewDecoder(r.Body).Decode(&createTournamentRequest); err != nil {
-		h.response.ErrorResponse(w, r, http.StatusBadRequest, "invalid body")
+	// 1. Receive DTO from JSON
+	var ctr dto.CreateTournamentRequest
+	if err := json.NewDecoder(r.Body).Decode(&ctr); err != nil {
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	v := validator.NewValidator()
-	v.Check(createTournamentRequest.Name != "", "name", "name is required")
-	if !v.Valid() {
-		h.response.FailedValidationResponse(w, r, v.ReturnErrors())
+	// 2. Map DTO to Command
+	cmd := h.mapper.MapToCommand(ctr)
+
+	// 3. Validate command
+	if err := cmd.Validate(); err != nil {
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
 	}
 
-	tournament := mapTournamentToDomain(createTournamentRequest)
-
-	result, err := h.service.CreateTournament(r.Context(), tournament)
+	// 4. Execute command via service
+	result, err := h.service.CreateTournament(r.Context(), cmd)
 	if err != nil {
 		h.response.ServerErrorResponse(w, r, err)
 		return
 	}
 
 	resp := mapTournamentToDto(result)
-	env := map[string]dto.Tournament{
+
+	env := map[string]dto.TournamentResponse{
 		"tournament": resp,
 	}
 
@@ -66,19 +72,22 @@ func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *ht
 
 // FindTournamentHandler is the entrypoint for finding a tournament
 func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http.Request) {
-	tournamentID := strings.TrimSpace(chi.URLParam(r, "id"))
-	if tournamentID == "" {
+	tournamentIDStr := strings.TrimSpace(chi.URLParam(r, "id"))
+	if tournamentIDStr == "" {
 		h.response.ErrorResponse(w, r, http.StatusBadRequest, "id is required")
 		return
 	}
 
-	id, err := uuid.Parse(tournamentID)
+	// Parse and validate the UUID here - fail fast
+	ID, err := uuid.Parse(tournamentIDStr)
 	if err != nil {
-		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, "invalid tournament ID format")
 		return
 	}
 
-	result, err := h.service.FindTournament(r.Context(), id)
+	cmd := h.mapper.MapToFindCommand(ID)
+
+	result, err := h.service.FindTournament(r.Context(), cmd)
 	if err != nil {
 		h.response.ServerErrorResponse(w, r, err)
 		return
@@ -86,7 +95,7 @@ func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http
 
 	tournament := mapTournamentToDto(result)
 
-	env := map[string]dto.Tournament{
+	env := map[string]dto.TournamentResponse{
 		"tournament": tournament,
 	}
 
