@@ -1,7 +1,7 @@
 package systemhandlers
 
 import (
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/system"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/system"
 	"github.com/ctfrancia/maple/internal/core/domain"
 )
 

@@ -1,7 +1,7 @@
 package tournamenthandlers
 
 import (
-	dto "github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/tournament"
+	dto "github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
 	"github.com/ctfrancia/maple/internal/core/domain"
 )
 

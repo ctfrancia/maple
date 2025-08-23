@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/system"
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/validator"
-	"github.com/ctfrancia/maple/internal/adapters/rest/response"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/system"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/validator"
+	"github.com/ctfrancia/maple/internal/adapters/http/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
 )
 

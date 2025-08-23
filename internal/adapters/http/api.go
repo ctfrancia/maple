@@ -1,13 +1,13 @@
-// Package rest is the REST API implementation
-package rest
+// Package http is the REST API implementation
+package http
 
 import (
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/system"
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/tournament"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/system"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/tournament"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

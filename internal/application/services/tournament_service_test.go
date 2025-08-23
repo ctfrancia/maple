@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/ctfrancia/maple/internal/adapters/logger"
-	"github.com/ctfrancia/maple/internal/adapters/repository/inmemory"
+	"github.com/ctfrancia/maple/internal/adapters/persistence/inmemory"
 	"github.com/ctfrancia/maple/internal/core/domain"
 )
 

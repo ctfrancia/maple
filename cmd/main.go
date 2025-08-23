@@ -9,12 +9,12 @@ import (
 	"syscall"
 	"time"
 
+	rest "github.com/ctfrancia/maple/internal/adapters/http"
 	"github.com/ctfrancia/maple/internal/adapters/logger"
-	"github.com/ctfrancia/maple/internal/adapters/repository/inmemory"
-	"github.com/ctfrancia/maple/internal/adapters/rest"
+	"github.com/ctfrancia/maple/internal/adapters/persistence/inmemory"
 	"github.com/ctfrancia/maple/internal/adapters/system"
+	"github.com/ctfrancia/maple/internal/application/services"
 	"github.com/ctfrancia/maple/internal/core/ports"
-	"github.com/ctfrancia/maple/internal/core/services"
 )
 
 var (
@@ -88,6 +88,7 @@ func main() {
 	}
 
 	// Create a new router
+	// TODO: this will be moved to server.go file
 	router := rest.NewRouter(log, shs, ts)
 	srv := &http.Server{
 		Addr:         listenAddress,

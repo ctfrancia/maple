@@ -3,13 +3,12 @@ package tournamenthandlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/dto/tournament"
-	"github.com/ctfrancia/maple/internal/adapters/rest/handlers/validator"
-	"github.com/ctfrancia/maple/internal/adapters/rest/response"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
+	"github.com/ctfrancia/maple/internal/adapters/http/handlers/validator"
+	"github.com/ctfrancia/maple/internal/adapters/http/response"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/google/uuid"
 
