@@ -42,7 +42,7 @@ func (r *Router) Routes() *chi.Mux {
 			v1s.Post("/new-consumer", r.sysHandler.NewConsumerHandler)
 		})
 		v1.Route("/tournament", func(v1t chi.Router) {
-			// v1t.Get("/tournaments", r.tournamentHandler.GetTournamentsHandler)
+			v1t.Get("/find/{id}", r.tournamentHandler.FindTournamentHandler)
 			v1t.Post("/new", r.tournamentHandler.CreateTournamentHandler)
 			// v1t.Post("/tournaments", r.tournamentHandler.CreateTournamentHandler)
 			// v1t.Put("/tournaments/{id}", r.tournamentHandler.UpdateTournamentHandler)

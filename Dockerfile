@@ -1,7 +1,7 @@
 ###########
 # THIS FILE IS ONLY FOR IN DEV, NEVER TO BE USED IN A PRODUCTION ENVIRONMENT
 ###########
-FROM golang:1.24-alpine3.22 AS builder
+FROM golang:1.24-alpine AS builder
 
 # Set timezone
 ENV TZ=Europe/Berlin
@@ -18,11 +18,16 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd
+# Debugging
+RUN echo "Current directory:" && pwd && echo "Directory contents:" && ls -la
+RUN echo "Looking for cmd directory:" && ls -la cmd/ || echo "cmd directory not found"
+RUN echo "Looking for Go files:" && find . -name "*.go" -type f | head -10
+
+# Build the application with verbose output for debugging
+RUN CGO_ENABLED=0 GOOS=linux go build -v -a -installsuffix cgo -o main ./cmd
 
 # Production stage - use minimal base image
-FROM alpine:3.22
+FROM alpine:3.20
 
 # Install ca-certificates and wget for healthcheck
 RUN apk --no-cache add ca-certificates wget

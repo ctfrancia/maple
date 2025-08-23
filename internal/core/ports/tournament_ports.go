@@ -12,6 +12,8 @@ type TournamentHandler interface {
 	CreateTournamentHandler(w http.ResponseWriter, r *http.Request)
 	FindTournamentHandler(w http.ResponseWriter, r *http.Request)
 	ListTournamentsHandler(w http.ResponseWriter, r *http.Request)
+	UpdateTournamentHandler(w http.ResponseWriter, r *http.Request)
+	DeleteTournamentHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type TournamentServicer interface {

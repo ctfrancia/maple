@@ -11,7 +11,7 @@ type InMemoryTournamentProvider struct {
 	mu         *sync.RWMutex
 }
 
-func NewTournamentRepositoryProvider(repo ports.TournamentRepository) *InMemoryTournamentProvider {
+func NewTournamentRepositoryProvider(repo ports.TournamentRepository) ports.TournamentRepositoryProvider {
 	return &InMemoryTournamentProvider{
 		repository: repo,
 		mu:         &sync.RWMutex{},

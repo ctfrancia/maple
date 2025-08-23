@@ -13,11 +13,11 @@ import (
 
 type TournamentServicer struct {
 	logger     ports.Logger
-	repository ports.TournamenRepositoryProvider
+	repository ports.TournamentRepositoryProvider
 	workerPool *TournamentWorkerPool // make this port
 }
 
-func NewTournamentServicer(log ports.Logger, tr ports.TournamenRepositoryProvider, wp *TournamentWorkerPool) (ports.TournamentServicer, error) {
+func NewTournamentServicer(log ports.Logger, tr ports.TournamentRepositoryProvider, wp *TournamentWorkerPool) (ports.TournamentServicer, error) {
 	return &TournamentServicer{
 		logger:     log,
 		repository: tr,

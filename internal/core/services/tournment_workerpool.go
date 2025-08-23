@@ -40,7 +40,7 @@ type TournamentTask struct {
 	Type       TaskType
 	Data       any // will be converted to a specific task type in handler
 	ResultCh   chan TaskResult
-	Repository ports.TournamenRepositoryProvider //ports.TournamentRepository
+	Repository ports.TournamentRepositoryProvider
 
 	Context context.Context
 }
@@ -54,9 +54,7 @@ type FindTournamentTask struct {
 	TournamentID uuid.UUID
 }
 
-type ListTournamentsTask struct {
-	// Tournaments []domain.Tournament update for params
-}
+type ListTournamentsTask struct{}
 
 func NewTournamentWorkerPool(ctx context.Context, cancel context.CancelFunc) *TournamentWorkerPool {
 	return &TournamentWorkerPool{
@@ -81,18 +79,23 @@ func (twp *TournamentWorkerPool) Start() {
 	}
 	twp.started = true
 }
+
 func (twp *TournamentWorkerPool) worker() {
 	for {
 		select {
 		case task := <-twp.taskQueue:
 			var result TaskResult
+
 			switch task.Type {
 			case TaskTypeCreateTournament:
 				result = twp.createTournament(task)
+
 			case TaskTypeFindTournament:
 				result = twp.findTournament(task)
+
 			case TaskTypeListTournaments:
 				result = twp.listTournaments(task)
+
 			default:
 				result = TaskResult{Error: fmt.Errorf("invalid task type")}
 			}
@@ -127,11 +130,13 @@ func (twp *TournamentWorkerPool) SubmitTask(task TournamentTask) <-chan TaskResu
 	select {
 	case twp.taskQueue <- task:
 		return task.ResultCh
+
 	case <-twp.ctx.Done():
 		resultCh := make(chan TaskResult, 1)
 		resultCh <- TaskResult{Error: fmt.Errorf("worker pool shutting down")}
 		close(resultCh)
 		return resultCh
+
 	default:
 		resultCh := make(chan TaskResult, 1)
 		resultCh <- TaskResult{Error: fmt.Errorf("worker pool queue full")}
@@ -156,7 +161,6 @@ func (twp *TournamentWorkerPool) createTournament(task TournamentTask) TaskResul
 		}
 		return nil
 	})
-
 	if err != nil {
 		return TaskResult{Error: err}
 	}
@@ -171,6 +175,7 @@ func (twp *TournamentWorkerPool) findTournament(task TournamentTask) TaskResult 
 	if !ok {
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
+
 	err = task.Repository.ReadTx(func(repo ports.TournamentRepository) error {
 		result, err = repo.FindTournament(t.TournamentID)
 		if err != nil {
@@ -178,7 +183,6 @@ func (twp *TournamentWorkerPool) findTournament(task TournamentTask) TaskResult 
 		}
 		return nil
 	})
-
 	if err != nil {
 		return TaskResult{Error: fmt.Errorf("error finding tournament: %v", err)}
 	}
@@ -191,7 +195,6 @@ func (twp *TournamentWorkerPool) listTournaments(task TournamentTask) TaskResult
 	var err error
 	_, ok := task.Data.(ListTournamentsTask)
 	if !ok {
-		//task.ResultCh <- TaskResult{Error: fmt.Errorf("invalid task data")}
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
 
@@ -202,7 +205,6 @@ func (twp *TournamentWorkerPool) listTournaments(task TournamentTask) TaskResult
 		}
 		return nil
 	})
-
 	if err != nil {
 		return TaskResult{Error: fmt.Errorf("error listing tournaments: %v", err)}
 	}

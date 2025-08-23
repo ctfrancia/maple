@@ -1,11 +1,13 @@
 package domain
 
+type ConsumerStatus string
+
 const (
 	// User Status - business states
 	ConsumerStatusActive    ConsumerStatus = "active"
-	ConsumerStatusInactive  UserStatus     = "inactive"
-	ConsumerStatusSuspended UserStatus     = "suspended"
-	ConsumerStatusPending   UserStatus     = "pending"
+	ConsumerStatusInactive  ConsumerStatus = "inactive"
+	ConsumerStatusSuspended ConsumerStatus = "suspended"
+	ConsumerStatusPending   ConsumerStatus = "pending"
 )
 
 type NewAPIConsumer struct {
