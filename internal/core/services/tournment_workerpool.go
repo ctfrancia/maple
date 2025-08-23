@@ -54,8 +54,7 @@ type FindTournamentTask struct {
 	TournamentID uuid.UUID
 }
 
-type ListTournamentsTask struct {
-}
+type ListTournamentsTask struct{}
 
 func NewTournamentWorkerPool(ctx context.Context, cancel context.CancelFunc) *TournamentWorkerPool {
 	return &TournamentWorkerPool{
@@ -80,6 +79,7 @@ func (twp *TournamentWorkerPool) Start() {
 	}
 	twp.started = true
 }
+
 func (twp *TournamentWorkerPool) worker() {
 	for {
 		select {
@@ -130,11 +130,13 @@ func (twp *TournamentWorkerPool) SubmitTask(task TournamentTask) <-chan TaskResu
 	select {
 	case twp.taskQueue <- task:
 		return task.ResultCh
+
 	case <-twp.ctx.Done():
 		resultCh := make(chan TaskResult, 1)
 		resultCh <- TaskResult{Error: fmt.Errorf("worker pool shutting down")}
 		close(resultCh)
 		return resultCh
+
 	default:
 		resultCh := make(chan TaskResult, 1)
 		resultCh <- TaskResult{Error: fmt.Errorf("worker pool queue full")}
@@ -159,7 +161,6 @@ func (twp *TournamentWorkerPool) createTournament(task TournamentTask) TaskResul
 		}
 		return nil
 	})
-
 	if err != nil {
 		return TaskResult{Error: err}
 	}
@@ -182,7 +183,6 @@ func (twp *TournamentWorkerPool) findTournament(task TournamentTask) TaskResult 
 		}
 		return nil
 	})
-
 	if err != nil {
 		return TaskResult{Error: fmt.Errorf("error finding tournament: %v", err)}
 	}
@@ -205,7 +205,6 @@ func (twp *TournamentWorkerPool) listTournaments(task TournamentTask) TaskResult
 		}
 		return nil
 	})
-
 	if err != nil {
 		return TaskResult{Error: fmt.Errorf("error listing tournaments: %v", err)}
 	}

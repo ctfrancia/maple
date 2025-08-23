@@ -39,11 +39,11 @@ func mapLocationToDto(l domain.Location) dto.Location {
 		City:       l.City,
 		State:      l.State,
 		Country:    l.Country,
-		//Name:       l.Name,
-		//County:     l.County,
-		//Province:   l.Province,
-		//Latitude:   l.Latitude,
-		//Longitude:  l.Longitude,
+		// Name:       l.Name,
+		// County:     l.County,
+		// Province:   l.Province,
+		// Latitude:   l.Latitude,
+		// Longitude:  l.Longitude,
 		// Timezone: domain.TimezoneUTC,
 	}
 }
