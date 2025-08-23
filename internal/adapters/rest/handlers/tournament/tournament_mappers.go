@@ -27,7 +27,7 @@ func mapTournamentToDto(t domain.Tournament) dto.Tournament {
 		Players:            nil,
 		NumberOfPlayers:    t.NumberOfPlayers,
 		Schedule:           mapScheduleToDto(t.Schedule),
-		Results:            nil, // results should be already mapped when creating tournament
+		Results:            nil,
 		Status:             dto.TournamentStatus(t.Status),
 	}
 }
@@ -46,6 +46,17 @@ func mapLocationToDto(l domain.Location) dto.Location {
 		//Longitude:  l.Longitude,
 		// Timezone: domain.TimezoneUTC,
 	}
+}
+
+func mapResultsToDto(r []domain.Result) []dto.Result {
+	xResults := make([]dto.Result, len(r))
+	for i, s := range r {
+		xResults[i] = dto.Result{
+			Player: s.Player.PublicID.String(),
+			Prize:  s.Prize,
+		}
+	}
+	return xResults
 }
 
 func mapScheduleToDto(sch []domain.Schedule) []dto.Schedule {

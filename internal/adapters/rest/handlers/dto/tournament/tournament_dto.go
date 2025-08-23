@@ -3,6 +3,8 @@ package dto
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type CreateTournamentRequest struct {
@@ -39,7 +41,7 @@ type Tournament struct {
 	Status             TournamentStatus `json:"status"`
 	CreatedAt          time.Time        `json:"created_at"`
 	UpdatedAt          time.Time        `json:"updated_at"`
-	SoftDeletedAt      *time.Time       `json:"soft_deleted_at,omitempty"`
+	SoftDeletedAt      *time.Time       `json:"soft_deleted_at,omitempty"` // omit if not soft deleted
 }
 
 type Location struct {
@@ -75,7 +77,7 @@ type Match struct {
 	PGN           string     `json:"pgn"`          // Portable Game Notation
 	CreatedAt     time.Time  `json:"created_at"`
 	UpdatedAt     time.Time  `json:"updated_at"`
-	SoftDeletedAt *time.Time `json:"soft_deleted_at,omitempty"`
+	SoftDeletedAt *time.Time `json:"soft_deleted_at,omitempty"` // omit if not soft deleted
 }
 
 type Schedule struct {

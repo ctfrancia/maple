@@ -92,8 +92,8 @@ type Payment struct {
 }
 
 type Result struct {
-	PlayerID Player
-	Prize    int64
+	Player Player
+	Prize  int64
 }
 
 type Contact struct {
