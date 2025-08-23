@@ -2,8 +2,33 @@ package tournamenthandlers
 
 import (
 	dto "github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
+	commands "github.com/ctfrancia/maple/internal/application/commands/tournament"
 	"github.com/ctfrancia/maple/internal/core/domain"
 )
+
+type TournamentMapper struct{}
+
+func NewTournamentMapper() TournamentMapper {
+	return TournamentMapper{}
+}
+
+func (m TournamentMapper) MapToCommand(dto dto.CreateTournamentRequest) commands.CreateTournamentCommand {
+	return commands.CreateTournamentCommand{
+		Name:     dto.Name,
+		Schedule: mapScheduleToCommand(dto.Schedule),
+	}
+}
+
+func mapScheduleToCommand(sch []dto.Schedule) []commands.Schedule {
+	xSch := make([]commands.Schedule, len(sch))
+	for i, s := range xSch {
+		xSch[i] = commands.Schedule{
+			StartTime: s.StartTime,
+			EndTime:   s.EndTime,
+		}
+	}
+	return xSch
+}
 
 // mapDomainToTournament converts dto.CreateTournamentRequest to domain.Tournament
 func mapTournamentToDomain(t dto.CreateTournamentRequest) domain.Tournament {
@@ -12,8 +37,8 @@ func mapTournamentToDomain(t dto.CreateTournamentRequest) domain.Tournament {
 	}
 }
 
-func mapTournamentToDto(t domain.Tournament) dto.Tournament {
-	return dto.Tournament{
+func mapTournamentToDto(t domain.Tournament) dto.TournamentResponse {
+	return dto.TournamentResponse{
 		ID:                 t.PublicID.String(),
 		Name:               t.Name,
 		Description:        t.Description,

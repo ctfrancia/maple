@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"sync"
 
+	commands "github.com/ctfrancia/maple/internal/application/commands/tournament"
 	"github.com/ctfrancia/maple/internal/core/domain"
 	"github.com/ctfrancia/maple/internal/core/ports"
 	"github.com/google/uuid"
@@ -46,8 +47,7 @@ type TournamentTask struct {
 }
 
 type CreateTournamentTask struct {
-	Tournament domain.Tournament
-	// Repository ports.TournamentRepository
+	Tournament commands.CreateTournamentCommand
 }
 
 type FindTournamentTask struct {
@@ -154,8 +154,10 @@ func (twp *TournamentWorkerPool) createTournament(task TournamentTask) TaskResul
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
 
+	tournament := domain.NewTournament(t.Tournament.Name, t.Tournament.Description)
+
 	err = task.Repository.WriteTx(func(repo ports.TournamentRepository) error {
-		result, err = repo.CreateTournament(t.Tournament)
+		result, err = repo.CreateTournament(*tournament)
 		if err != nil {
 			return err
 		}

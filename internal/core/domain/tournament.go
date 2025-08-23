@@ -42,7 +42,7 @@ type Tournament struct {
 	PublicID           uuid.UUID // this is the public ID
 	Name               string
 	Location           Location // address or location
-	Creator            Player
+	Creator            Player   // REVISIT: this is actually going to be the website owner, not a player
 	Contact            Contact
 	Description        string
 	OpenToPublic       bool
@@ -69,18 +69,20 @@ type Schedule struct {
 }
 
 type Registration struct {
-	Status    RegistrationStatus
-	StartTime time.Time
-	EndTime   time.Time
-	Fee       int64
-	PrizePool int64
-	Payment   []Payment
+	Status     RegistrationStatus
+	StartTime  time.Time
+	EndTime    time.Time
+	PublicFee  int64
+	PrivateFee int64
+	OtherFee   int64
+	PrizePool  int64
+	Payment    []Payment
 }
 
 type PaymentType string
 
 const (
-	PaymentTypeMonetary PaymentType = "monetary" //money
+	PaymentTypeMonetary PaymentType = "monetary" // money
 	PaymentTypePhysical PaymentType = "physical" // e.g. book/lesson/etc.
 	PaymentTypeOther    PaymentType = "other"
 )
@@ -100,4 +102,11 @@ type Contact struct {
 	Name  string
 	Email string
 	Phone string
+}
+
+func NewTournament(name, desc string) *Tournament {
+	return &Tournament{
+		Name:        name,
+		Description: desc,
+	}
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	commands "github.com/ctfrancia/maple/internal/application/commands/tournament"
 	"github.com/ctfrancia/maple/internal/core/domain"
 	"github.com/ctfrancia/maple/internal/core/ports"
 
@@ -23,7 +24,7 @@ func NewTournamentServicer(log ports.Logger, tr ports.TournamentRepositoryProvid
 	}, nil
 }
 
-func (ts *TournamentServicer) CreateTournament(ctx context.Context, tournament domain.Tournament) (domain.Tournament, error) {
+func (ts *TournamentServicer) CreateTournament(ctx context.Context, tournament commands.CreateTournamentCommand) (domain.Tournament, error) {
 	task := TournamentTask{
 		ID:         uuid.New(),
 		Type:       TaskTypeCreateTournament,
