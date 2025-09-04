@@ -154,6 +154,7 @@ func (twp *TournamentWorkerPool) createTournament(task TournamentTask) TaskResul
 		return TaskResult{Error: fmt.Errorf("invalid task data")}
 	}
 
+	// this is wrong, we command should be creating the tournament object change to cmd.ToDomain()
 	tournament := domain.NewTournament(t.Tournament.Name, t.Tournament.Description)
 
 	err = task.Repository.WriteTx(func(repo ports.TournamentRepository) error {

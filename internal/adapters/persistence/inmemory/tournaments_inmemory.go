@@ -48,3 +48,11 @@ func (ir *InMemoryTournamentRepository) ListTournaments(params any) ([]domain.To
 
 	return tournaments, nil
 }
+
+func (ir *InMemoryTournamentRepository) UpdateTournament(tournament domain.Tournament) (domain.Tournament, error) {
+	found, ok := ir.tournaments[tournament.PublicID]
+	if !ok {
+		return domain.Tournament{}, domain.ErrTournamentNotFound
+	}
+	found.Name = tournament.Name
+}
