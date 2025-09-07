@@ -3,57 +3,26 @@ package commands
 
 import (
 	"strings"
-	"time"
+
+	"github.com/ctfrancia/maple/internal/application/commands/tournament/types"
 )
 
 // CreateTournamentCommand represents the user's intent to create a tournament
 // This represents all fields that are accepted by the API when creating a tournament
 type CreateTournamentCommand struct {
-	Name               string       `json:"name"`        //`json:"name" validate:"required,gte=3,lte=100"` look into this?
-	Description        string       `json:"description"` // optional
-	Schedule           []Schedule   `json:"schedule,omitempty"`
-	AdditionalInfo     string       `json:"additional_info"`      // optional TODO: add this to the DTO
-	LocationID         string       `json:"location_id"`          // need to revisit
-	MaxPlayers         int          `json:"max_players"`          // optional when creating
-	Contact            Contact      `json:"contact"`              // optional
-	OpenToPublic       bool         `json:"open_to_public"`       // optional
-	OpenToRegistration bool         `json:"open_to_registration"` // optional
-	Registration       Registration `json:"registration"`         // optional
-}
-
-// Registration represents the registration information for the tournament
-type Registration struct {
-	Status     RegistrationStatus `json:"status"`
-	StartTime  time.Time          `json:"start_time"`
-	EndTime    time.Time          `json:"end_time"`
-	PublicFee  int64              `json:"fee"`
-	PrivateFee int64              `json:"private_fee"`
-	OtherFee   int64              `json:"other_fee"`
-	PrizePool  int64              `json:"prize_pool"`
-	Payment    []Payment          `json:"payment"`
-}
-
-// Schedule represents the schedule for the tournament
-type Schedule struct {
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
-}
-
-// Payment represents the payment information for the tournament
-type Payment struct {
-	Place  int         `json:"place"`  // 1st, 2nd, etc.
-	Amount int64       `json:"amount"` // if type is monetary
-	Type   PaymentType `json:"type"`
-}
-
-// Contact represents the contact information for the tournament
-type Contact struct {
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Phone string `json:"phone"`
+	Name           string              `json:"name"`
+	Description    string              `json:"description"`
+	Schedule       *[]types.Schedule   `json:"schedule,omitempty"`
+	AdditionalInfo *string             `json:"additional_info,omitempty"` // optional
+	LocationID     *string             `json:"location_id,omitempty"`     // need to revisit
+	MaxPlayers     *int                `json:"max_players,omitempty"`     // optional when creating
+	Contact        *types.Contact      `json:"contact,omitempty"`         // optional
+	OpenToPublic   *bool               `json:"open_to_public,omitempty"`  // optional
+	Registration   *types.Registration `json:"registration,omitempty"`    // optional
 }
 
 // Validate is where we handle the validation of the command
+// TODO: all fields need to be scrubbed of swear words, racism, etc.
 func (cmd CreateTournamentCommand) Validate() error {
 	errors := make(map[string]string)
 
@@ -69,6 +38,12 @@ func (cmd CreateTournamentCommand) Validate() error {
 	// Description validation (optional but if provided, check length)
 	if len(cmd.Description) > 500 {
 		errors["description"] = "must be less than 500 characters"
+	}
+
+	// TODO: implemeent schedule validation
+	if cmd.Schedule != nil {
+		// Schedule validation (optional but if provided, check relationship)
+		cmd.validateDates(errors)
 	}
 
 	// Date validation (optional but if provided, check relationship)
@@ -90,9 +65,9 @@ func IsValidationError(err error) (*ValidationError, bool) {
 }
 
 // validateDates handles date validation logic
-func (cmd CreateTournamentCommand) validateDates(errors map[string]string) {
+func (cmd *CreateTournamentCommand) validateDates(errors map[string]string) {
 	// Check if dates are provided but zero (invalid state)
-	if len(cmd.Schedule) == 0 {
+	if len(*cmd.Schedule) == 0 {
 		return
 	}
 	// TODO: check if dates are valid

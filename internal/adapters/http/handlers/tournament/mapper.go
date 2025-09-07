@@ -3,6 +3,7 @@ package tournamenthandlers
 import (
 	dto "github.com/ctfrancia/maple/internal/adapters/http/handlers/dto/tournament"
 	commands "github.com/ctfrancia/maple/internal/application/commands/tournament"
+	"github.com/ctfrancia/maple/internal/application/commands/tournament/types"
 	"github.com/ctfrancia/maple/internal/core/domain"
 	"github.com/google/uuid"
 )
@@ -26,15 +27,15 @@ func (m TournamentMapper) MapToFindCommand(ID uuid.UUID) commands.FindTournament
 	}
 }
 
-func mapScheduleToCommand(sch []dto.Schedule) []commands.Schedule {
-	xSch := make([]commands.Schedule, len(sch))
+func mapScheduleToCommand(sch []dto.Schedule) *[]types.Schedule {
+	xSch := make([]types.Schedule, len(sch))
 	for i, s := range xSch {
-		xSch[i] = commands.Schedule{
+		xSch[i] = types.Schedule{
 			StartTime: s.StartTime,
 			EndTime:   s.EndTime,
 		}
 	}
-	return xSch
+	return &xSch
 }
 
 // mapDomainToTournament converts dto.CreateTournamentRequest to domain.Tournament

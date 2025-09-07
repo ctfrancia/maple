@@ -55,4 +55,6 @@ func (ir *InMemoryTournamentRepository) UpdateTournament(tournament domain.Tourn
 		return domain.Tournament{}, domain.ErrTournamentNotFound
 	}
 	found.Name = tournament.Name
+
+	return found, nil
 }

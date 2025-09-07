@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/ctfrancia/maple/internal/application/commands/tournament/types"
 )
 
 func TestCreateTournamentCommand_Validate(t *testing.T) {
+	addInfo := "add info"
+	locID := "loc123"
+	maxPlayers := 100
+	openToPublic := true
 	tests := []struct {
 		name         string
 		cmd          CreateTournamentCommand
@@ -134,7 +140,7 @@ func TestCreateTournamentCommand_Validate(t *testing.T) {
 			name: "valid tournament with empty schedule",
 			cmd: CreateTournamentCommand{
 				Name:     "Test Tournament",
-				Schedule: []Schedule{},
+				Schedule: &[]types.Schedule{},
 			},
 			wantErr:      false,
 			expectedErrs: nil,
@@ -143,7 +149,7 @@ func TestCreateTournamentCommand_Validate(t *testing.T) {
 			name: "valid tournament with schedule",
 			cmd: CreateTournamentCommand{
 				Name: "Test Tournament",
-				Schedule: []Schedule{
+				Schedule: &[]types.Schedule{
 					{
 						StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
 						EndTime:   time.Date(2024, 1, 1, 18, 0, 0, 0, time.UTC),
@@ -156,37 +162,36 @@ func TestCreateTournamentCommand_Validate(t *testing.T) {
 		{
 			name: "valid tournament with all optional fields",
 			cmd: CreateTournamentCommand{
-				Name:               "Complete Tournament",
-				Description:        "A complete tournament with all fields",
-				AdditionalInfo:     "Some additional info",
-				LocationID:         "loc123",
-				MaxPlayers:         100,
-				OpenToPublic:       true,
-				OpenToRegistration: true,
-				Schedule: []Schedule{
+				Name:           "Complete Tournament",
+				Description:    "A complete tournament with all fields",
+				AdditionalInfo: &addInfo,
+				LocationID:     &locID,
+				MaxPlayers:     &maxPlayers,
+				OpenToPublic:   &openToPublic,
+				Schedule: &[]types.Schedule{
 					{
 						StartTime: time.Date(2024, 1, 1, 10, 0, 0, 0, time.UTC),
 						EndTime:   time.Date(2024, 1, 1, 18, 0, 0, 0, time.UTC),
 					},
 				},
-				Contact: Contact{
+				Contact: &types.Contact{
 					Name:  "John Doe",
 					Email: "john@example.com",
 					Phone: "123-456-7890",
 				},
-				Registration: Registration{
-					Status:     "open", // Assuming RegistrationStatus is a string type
+				Registration: &types.Registration{
+					Status:     types.RegistrationStatusOpen,
 					StartTime:  time.Date(2024, 1, 1, 8, 0, 0, 0, time.UTC),
 					EndTime:    time.Date(2024, 1, 1, 9, 0, 0, 0, time.UTC),
 					PublicFee:  1000,
 					PrivateFee: 800,
 					OtherFee:   500,
 					PrizePool:  10000,
-					Payment: []Payment{
+					Payment: []types.Payment{
 						{
 							Place:  1,
 							Amount: 5000,
-							Type:   "monetary", // Assuming PaymentType is a string type
+							Type:   types.PaymentTypeMonetary,
 						},
 					},
 				},
