@@ -10,15 +10,15 @@ import (
 // CreateTournamentCommand represents the user's intent to create a tournament
 // This represents all fields that are accepted by the API when creating a tournament
 type CreateTournamentCommand struct {
-	Name           string              `json:"name"`
-	Description    string              `json:"description"`
-	Schedule       *[]types.Schedule   `json:"schedule,omitempty"`
-	AdditionalInfo *string             `json:"additional_info,omitempty"` // optional
-	LocationID     *string             `json:"location_id,omitempty"`     // need to revisit
-	MaxPlayers     *int                `json:"max_players,omitempty"`     // optional when creating
-	Contact        *types.Contact      `json:"contact,omitempty"`         // optional
-	OpenToPublic   *bool               `json:"open_to_public,omitempty"`  // optional
-	Registration   *types.Registration `json:"registration,omitempty"`    // optional
+	Name           string            `json:"name"`
+	Description    string            `json:"description"`
+	Schedule       *[]types.Schedule `json:"schedule,omitempty"`
+	AdditionalInfo *string           `json:"additional_info,omitempty"` // optional
+	Location       *types.Location   `json:"location_id,omitempty"`     // need to revisit
+	// MaxPlayers     *int                `json:"max_players,omitempty"`     // optional when creating
+	Contact      *types.Contact      `json:"contact,omitempty"`        // optional
+	OpenToPublic *bool               `json:"open_to_public,omitempty"` // optional
+	Registration *types.Registration `json:"registration,omitempty"`   // optional
 }
 
 // Validate is where we handle the validation of the command

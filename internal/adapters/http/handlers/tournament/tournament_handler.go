@@ -70,6 +70,16 @@ func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *ht
 	h.response.WriteJSON(w, http.StatusCreated, env, nil)
 }
 
+// UpdateTournamentHandler is the entrypoint for updating a tournament
+func (h *TournamentHandler) UpdateTournamentHandler(w http.ResponseWriter, r *http.Request) {
+	// 1. Receive DTO from JSON
+	var ctr dto.UpdateTournamentRequest
+	if err := json.NewDecoder(r.Body).Decode(&ctr); err != nil {
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+}
+
 // FindTournamentHandler is the entrypoint for finding a tournament
 func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	tournamentIDStr := strings.TrimSpace(chi.URLParam(r, "id"))
@@ -105,10 +115,6 @@ func (h *TournamentHandler) FindTournamentHandler(w http.ResponseWriter, r *http
 
 // ListTournamentsHandler is the entrypoint for listing tournaments
 func (h *TournamentHandler) ListTournamentsHandler(w http.ResponseWriter, r *http.Request) {
-}
-
-// UpdateTournamentHandler is the entrypoint for updating a tournament
-func (h *TournamentHandler) UpdateTournamentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteTournamentHandler is the entrypoint for HARD deleting a tournament

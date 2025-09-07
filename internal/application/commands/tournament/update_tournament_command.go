@@ -5,16 +5,14 @@ import (
 )
 
 type UpdateTournamentCommand struct {
-	Name               *string             `json:"name,omitempty"`
-	Description        *string             `json:"description,omitempty"`
-	Schedule           *[]types.Schedule   `json:"schedule,omitempty"`
-	AdditionalInfo     *string             `json:"additional_info,omitempty"`
-	LocationID         *string             `json:"location_id,omitempty"`
-	MaxPlayers         *int                `json:"max_players,omitempty"`
-	Contact            *types.Contact      `json:"contact,omitempty"`
-	OpenToPublic       *bool               `json:"open_to_public,omitempty"`
-	OpenToRegistration *bool               `json:"open_to_registration,omitempty"`
-	Registration       *types.Registration `json:"registration,omitempty"`
+	Name           *string             `json:"name,omitempty"`
+	Description    *string             `json:"description,omitempty"`
+	AdditionalInfo *string             `json:"additional_info,omitempty"`
+	Schedule       *[]types.Schedule   `json:"schedule,omitempty"`
+	Location       *types.Location     `json:"location,omitempty"`
+	Roster         *types.Roster       `json:"roster,omitempty"`
+	Contact        *types.Contact      `json:"contact,omitempty"`
+	Registration   *types.Registration `json:"registration,omitempty"`
 }
 
 // Validate is where we handle the validation of the command
@@ -27,5 +25,18 @@ func (cmd UpdateTournamentCommand) Validate() error {
 	if cmd.Name != nil && len(*cmd.Name) == 0 {
 		errors["name"] = "is required"
 	}
+
+	if cmd.Description != nil && len(*cmd.Description) == 0 {
+		errors["description"] = "a description is required"
+	}
+
+	if cmd.Schedule != nil && len(*cmd.Schedule) == 0 {
+		errors["schedule"] = "a schedule cannot be empty"
+	}
+
+	if len(errors) > 0 {
+		return ValidationError{Errors: errors}
+	}
+
 	return nil
 }
