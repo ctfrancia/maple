@@ -10,7 +10,7 @@ const (
 	ConsumerStatusPending   ConsumerStatus = "pending"
 )
 
-type NewAPIConsumer struct {
+type APIConsumer struct {
 	PublicID        string
 	FirstName       string
 	LastName        string

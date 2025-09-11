@@ -4,25 +4,25 @@ import (
 	"time"
 )
 
-type RegistrationStatus int
+type RegistrationStatus string
 
 const (
-	RegistrationStatusOpen RegistrationStatus = iota
-	RegistrationStatusClosed
+	RegistrationStatusClosed RegistrationStatus = "closed"
+	RegistrationStatusOpen   RegistrationStatus = "open"
 )
 
 // Registration represents the registration information for the tournament
 type Registration struct {
-	Status         RegistrationStatus `json:"status"`
-	StartTime      time.Time          `json:"start_time"`
-	EndTime        time.Time          `json:"end_time"`
-	PublicFee      int64              `json:"fee"`
-	PrivateFee     int64              `json:"private_fee"`
-	OtherFee       int64              `json:"other_fee"`
-	PrizePool      int64              `json:"prize_pool"`
-	Payment        []Payment          `json:"payment"`
-	Email          Email              `json:"email"`
-	Website        string             `json:"website"`
-	Phone          string             `json:"phone"`
-	AdditionalInfo string             `json:"additional_info"` // additional info for registration
+	Status         *RegistrationStatus `json:"status,omitempty"`
+	StartTime      *time.Time          `json:"start_time,omitempty"`
+	EndTime        *time.Time          `json:"end_time,omitempty"`
+	PublicFee      *int64              `json:"fee,omitempty"`
+	PrivateFee     *int64              `json:"private_fee,omitempty"`
+	OtherFee       *int64              `json:"other_fee,omitempty"`
+	PrizePool      *int64              `json:"prize_pool,omitempty"`
+	Payment        *[]Payment          `json:"payment,omitempty"`
+	Email          *Email              `json:"email,omitempty"`           // if they register through emailing
+	Website        *string             `json:"website,omitempty"`         // if they register through website
+	Phone          *string             `json:"phone,omitempty"`           // if they register through phone
+	AdditionalInfo *string             `json:"additional_info,omitempty"` // additional info for registration
 }

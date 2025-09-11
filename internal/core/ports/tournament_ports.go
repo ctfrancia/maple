@@ -24,6 +24,7 @@ type TournamentServicer interface {
 	CreateTournament(ctx context.Context, tournament commands.CreateTournamentCommand) (domain.Tournament, error)
 	ListTournaments(ctx context.Context) ([]domain.Tournament, error)
 	FindTournament(ctx context.Context, cmd commands.FindTournamentCommand) (domain.Tournament, error)
+	UpdateTournament(ctx context.Context, cmd *commands.UpdateTournamentCommand) (domain.Tournament, error)
 }
 
 // TournamentRepository  is for our persistence layer

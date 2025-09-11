@@ -28,7 +28,7 @@ func NewTournamentHandler(log ports.Logger, ts ports.TournamentServicer) ports.T
 		service:   ts,
 		response:  response.NewResponseWriter(log),
 		logger:    log,
-		validator: validator.NewValidator(),
+		validator: validator.New(),
 		mapper:    NewTournamentMapper(),
 	}
 
@@ -73,11 +73,33 @@ func (h *TournamentHandler) CreateTournamentHandler(w http.ResponseWriter, r *ht
 // UpdateTournamentHandler is the entrypoint for updating a tournament
 func (h *TournamentHandler) UpdateTournamentHandler(w http.ResponseWriter, r *http.Request) {
 	// 1. Receive DTO from JSON
-	var ctr dto.UpdateTournamentRequest
-	if err := json.NewDecoder(r.Body).Decode(&ctr); err != nil {
+	var utr dto.UpdateTournamentRequest
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&utr); err != nil {
 		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	cmd, err := utr.Validate()
+	if err != nil {
+		h.response.ErrorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	result, err := h.service.UpdateTournament(r.Context(), cmd)
+	if err != nil {
+		h.response.ServerErrorResponse(w, r, err)
+		return
+	}
+
+	// Successful response revist because not sure if we need to return the whole object
+	env := map[string]dto.TournamentResponse{
+		"tournament": mapTournamentToDto(result),
+	}
+
+	// h.response.WriteJSON(w, http.StatusNoContent, nil, nil)
+	h.response.WriteJSON(w, http.StatusOK, env, nil)
 }
 
 // FindTournamentHandler is the entrypoint for finding a tournament

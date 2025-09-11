@@ -15,7 +15,7 @@ type TournamentStatus string
 const (
 	TournamentStatusActive    TournamentStatus = "active"
 	TournamentStatusDraft     TournamentStatus = "draft"
-	TournamentStatusInactive  TournamentStatus = "inactive"
+	TournamentStatusDeactive  TournamentStatus = "deactive"
 	TournamentStatusSuspended TournamentStatus = "suspended"
 	TournamentStatusPending   TournamentStatus = "pending"
 	TournamentStatusCompleted TournamentStatus = "completed"

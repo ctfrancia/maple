@@ -1,7 +1,10 @@
 package domain
 
+import "github.com/google/uuid"
+
 type Club struct {
 	ID        int
+	PublicID  uuid.UUID
 	Name      string
 	Address   string
 	City      string

@@ -13,9 +13,9 @@ var ErrTournamentNotFound = errors.New("tournament not found")
 type TournamentStatus string
 
 const (
-	TournamentStatusActive    TournamentStatus = "active"
+	TournamentStatusActive    TournamentStatus = "active" // tournamnet in progress
 	TournamentStatusDraft     TournamentStatus = "draft"
-	TournamentStatusInactive  TournamentStatus = "inactive"
+	TournamentStatusDeactive  TournamentStatus = "deactive" // soft delete
 	TournamentStatusSuspended TournamentStatus = "suspended"
 	TournamentStatusPending   TournamentStatus = "pending"
 	TournamentStatusCompleted TournamentStatus = "completed"
@@ -28,6 +28,7 @@ const (
 	PairingMethodNone       PairingMethod = "none"
 	PairingMethodDraw       PairingMethod = "draw"
 	PairingMethodRoundRobin PairingMethod = "round_robin"
+	PairingMethodSwiss      PairingMethod = "swiss"
 )
 
 type RegistrationStatus string
@@ -42,7 +43,7 @@ type Tournament struct {
 	PublicID           uuid.UUID // this is the public ID
 	Name               string
 	Location           Location // address or location
-	Creator            Player   // REVISIT: this is actually going to be the website owner, not a player
+	Creator            APIConsumer
 	Contact            Contact
 	Description        string
 	OpenToPublic       bool
@@ -51,9 +52,9 @@ type Tournament struct {
 	Registration       Registration
 	Arbitrator         string
 	PairingMethod      PairingMethod
-	Matches            []Match
-	Players            []Player // no more no less than 2 white/black
-	NumberOfPlayers    int      // how many are participating
+	Matches            []Match // no more no less than 2 white/black
+	Players            []Player
+	NumberOfPlayers    int // how many are participating
 	Schedule           []Schedule
 	Results            []Result
 	Status             TournamentStatus

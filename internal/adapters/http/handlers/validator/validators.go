@@ -2,8 +2,10 @@
 package validator
 
 import (
+	"fmt"
 	"regexp"
 	"slices"
+	"strings"
 )
 
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
@@ -13,7 +15,7 @@ type Validator struct {
 }
 
 // New returns a new pointer to the handler of Validator
-func NewValidator() *Validator {
+func New() *Validator {
 	return &Validator{Errors: make(map[string]string)}
 }
 
@@ -65,4 +67,18 @@ func Unique[T comparable](values []T) bool {
 	}
 
 	return len(values) == len(uniqueValues)
+}
+
+// Error returns a string representation of the validation errors
+func (v *Validator) Error() string {
+	if len(v.Errors) == 0 {
+		return "validation failed"
+	}
+
+	var messages []string
+	for field, msg := range v.Errors {
+		messages = append(messages, fmt.Sprintf("%s: %s", field, msg))
+	}
+
+	return fmt.Sprintf("validation failed: %s", strings.Join(messages, ", "))
 }
