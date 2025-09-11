@@ -98,3 +98,28 @@ func (ts *TournamentServicer) FindTournament(ctx context.Context, cmd commands.F
 		return domain.Tournament{}, ctx.Err()
 	}
 }
+
+func (s *TournamentServicer) UpdateTournament(ctx context.Context, cmd *commands.UpdateTournamentCommand) (domain.Tournament, error) {
+	task := TournamentTask{
+		ID:         uuid.New(),
+		Type:       TaskTypeUpdateTournament,
+		Data:       UpdateTournamentTask{Tournament: cmd.ToUpdateMap()},
+		Repository: s.repository,
+		ResultCh:   make(chan TaskResult, 1),
+		Context:    ctx,
+	}
+
+	resultCh := s.workerPool.SubmitTask(task)
+
+	select {
+	case result := <-resultCh:
+		if result.Error != nil {
+			// error handling here
+			return domain.Tournament{}, result.Error
+		}
+		return result.Data.(domain.Tournament), nil
+
+	case <-ctx.Done():
+		return domain.Tournament{}, ctx.Err()
+	}
+}

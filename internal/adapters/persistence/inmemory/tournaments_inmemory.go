@@ -3,6 +3,7 @@
 package inmemory
 
 import (
+	"errors"
 	"time"
 
 	"github.com/ctfrancia/maple/internal/core/domain"
@@ -49,12 +50,40 @@ func (ir *InMemoryTournamentRepository) ListTournaments(params any) ([]domain.To
 	return tournaments, nil
 }
 
-func (ir *InMemoryTournamentRepository) UpdateTournament(tournament domain.Tournament) (domain.Tournament, error) {
-	found, ok := ir.tournaments[tournament.PublicID]
+func (ir *InMemoryTournamentRepository) UpdateTournament(updates map[string]any) (domain.Tournament, error) {
+	// Safe type assertion for ID
+	id, ok := updates["id"].(uuid.UUID)
 	if !ok {
+		return domain.Tournament{}, errors.New("invalid tournament ID")
+	}
+
+	// Find existing tournament
+	tournament, exists := ir.tournaments[id]
+	if !exists {
 		return domain.Tournament{}, domain.ErrTournamentNotFound
 	}
-	found.Name = tournament.Name
 
-	return found, nil
+	// Apply only the fields present in the updates map (like GORM does)
+	if name, exists := updates["name"]; exists {
+		tournament.Name = name.(string)
+	}
+
+	if description, exists := updates["description"]; exists {
+		tournament.Description = description.(string)
+	}
+
+	if status, exists := updates["status"]; exists {
+		tournament.Status = status.(domain.TournamentStatus)
+	}
+
+	// Add other fields as needed...
+
+	// Always update timestamp
+	tournament.UpdatedAt = time.Now()
+
+	// Save back to map
+	ir.tournaments[id] = tournament
+
+	// Return the updated tournament
+	return tournament, nil
 }

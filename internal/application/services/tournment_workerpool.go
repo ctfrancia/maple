@@ -18,6 +18,7 @@ const (
 	TaskTypeCreateTournament TaskType = "create_tournament"
 	TaskTypeFindTournament   TaskType = "find_tournament"
 	TaskTypeListTournaments  TaskType = "list_tournaments"
+	TaskTypeUpdateTournament TaskType = "update_tournament"
 )
 
 type TournamentWorkerPool struct {
@@ -52,6 +53,10 @@ type CreateTournamentTask struct {
 
 type FindTournamentTask struct {
 	TournamentID uuid.UUID
+}
+
+type UpdateTournamentTask struct {
+	Tournament map[string]any
 }
 
 type ListTournamentsTask struct{}
@@ -95,6 +100,9 @@ func (twp *TournamentWorkerPool) worker() {
 
 			case TaskTypeListTournaments:
 				result = twp.listTournaments(task)
+
+			case TaskTypeUpdateTournament:
+				result = twp.updateTournament(task)
 
 			default:
 				result = TaskResult{Error: fmt.Errorf("invalid task type")}
@@ -213,4 +221,23 @@ func (twp *TournamentWorkerPool) listTournaments(task TournamentTask) TaskResult
 	}
 
 	return TaskResult{Data: results}
+}
+
+func (twp *TournamentWorkerPool) updateTournament(task TournamentTask) TaskResult {
+	var err error
+
+	t, ok := task.Data.(UpdateTournamentTask)
+	if !ok {
+		return TaskResult{Error: fmt.Errorf("invalid task data")}
+	}
+
+	err = task.Repository.WriteTx(func(repo ports.TournamentRepository) error {
+		err = repo.UpdateTournament(t.Tournament)
+		return nil
+	})
+	if err != nil {
+		return TaskResult{Error: err}
+	}
+
+	return TaskResult{Error: fmt.Errorf("not implemented")}
 }

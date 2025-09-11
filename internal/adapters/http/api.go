@@ -44,8 +44,8 @@ func (r *Router) Routes() *chi.Mux {
 		v1.Route("/tournament", func(v1t chi.Router) {
 			v1t.Get("/find/{id}", r.tournamentHandler.FindTournamentHandler)
 			v1t.Post("/new", r.tournamentHandler.CreateTournamentHandler)
-			// v1t.Post("/tournaments", r.tournamentHandler.CreateTournamentHandler)
 			// v1t.Put("/tournaments/{id}", r.tournamentHandler.UpdateTournamentHandler)
+			v1t.Put("/update/{id}", r.tournamentHandler.UpdateTournamentHandler)
 			// v1t.Delete("/tournaments/{id}", r.tournamentHandler.DeleteTournamentHandler)
 		})
 		v1.Route("/match", func(v1m chi.Router) {
