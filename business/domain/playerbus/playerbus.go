@@ -17,7 +17,6 @@ var (
 // Storer declares the behaviour this package needs to persist and retrieve data.
 type Storer interface {
 	NewWithTx()
-	SavePlayer()
 	Create()
 	Update()
 	Delete()
@@ -31,33 +30,25 @@ type Business struct {
 	storer    Storer
 }
 
-// NewBusiness constructs a player business API for use.
+// NewBusiness creates a new instance of the player business.
 func NewBusiness(log any, playerbus any, storer Storer) *Business {
-	b := Business{}
+	a := Business{}
 
-	return &b
+	return &a
 }
 
-// Create adds a new chess player to the system.
-func (b *Business) Create() {
+// Create creates a new player.
+func (a *Business) Create() {
 }
 
-// Update modifies an existing chess player in the system.
-func (b *Business) Update() {
+// Update updates an existing player.
+func (a *Business) Update() {
 }
 
-// Delete removes an existing chess player from the system.
-func (b *Business) Delete() {
+// Delete deletes an existing player.
+func (a *Business) Delete() {
 }
 
-// Query retrieves a list of existing chess players from the system.
-func (b *Business) Query() {
-}
-
-// Count returns the total number of players in the system.
-func (b *Business) Count() {
-}
-
-// QueryByID retrieves a single chess player by ID.
-func (b *Business) QueryByID(ID uuid.UUID) {
+// Query returns a list of players.
+func (a *Business) Query() {
 }
