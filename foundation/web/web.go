@@ -2,7 +2,11 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Encoder defines behavior that can encode a data model and provide
@@ -22,9 +26,69 @@ type Logger func(ctx context.Context, msg string, args ...any)
 // context object for each of our http handlers.
 type App struct {
 	log     Logger
-	tracer  any
+	tracer  trace.Tracer
 	mux     *http.ServeMux
 	otmux   http.Handler
 	mw      []MidFunc
 	origins []string
+}
+
+// NewApp creates an App value that handle a set of routes for the application
+func NewApp(log Logger, tracer trace.Tracer, mw ...MidFunc) *App {
+	// Create an otel http handler which wraps our router. This will
+	// start the initial span and annotate it with info about the request/trusted.
+	mux := http.NewServeMux()
+
+	return &App{
+		log:    log,
+		tracer: tracer,
+		mux:    mux,
+		otmux:  otelhttp.NewHandler(mux, "request"),
+		mw:     mw,
+	}
+}
+
+func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if a.origins != nil {
+		reqOrigin := r.Header.Get("Origin")
+		for _, origin := range a.origins {
+			if origin == "*" || origin == reqOrigin {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				break
+			}
+		}
+
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		w.Header().Set("Access-Control-Max-Age", "86400")
+	}
+
+	a.otmux.ServeHTTP(w, r)
+}
+
+// EnableCors enables CORS preflight requests to work. It prevents the
+// MethodNotAllowedHandler from being called
+func (a *App) EnableCors(origins []string) {
+	a.origins = origins
+}
+
+func (a *App) HandlerFuncNoMid(method, group, path string, handlerFunc HandlerFunc) {
+	h := func(w http.ResponseWriter, r *http.Request) {
+		ctx := setWriter(r.Context(), w)
+
+		resp := handlerFunc(ctx, r)
+
+		if err := Respond(ctx, w, resp); err != nil {
+			a.log(ctx, "web-respond", err)
+			return
+		}
+	}
+
+	finalPath := path
+	if group != "" {
+		finalPath = "/" + group + path
+	}
+	finalPath = fmt.Sprintf("%s %s", method, finalPath)
+
+	a.mux.HandleFunc(finalPath, h)
 }
