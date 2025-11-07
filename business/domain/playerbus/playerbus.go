@@ -9,7 +9,9 @@ import (
 
 // Set of errors raised by the player domain.
 var (
-	ErrPlayerNotFound = errors.New("player not found")
+	ErrPlayerNotFound        = errors.New("player not found")
+	ErrUniqueEmail           = errors.New("email is not unique")
+	ErrAuthenticationFailure = errors.New("authentication failed")
 )
 
 // Storer declares the behaviour this package needs to persist and retrieve data.

@@ -2,17 +2,26 @@ package playerbus
 
 import (
 	"net/mail"
+	"time"
 
+	"github.com/ctfrancia/maple/business/types/name"
 	"github.com/ctfrancia/maple/business/types/password"
 	"github.com/ctfrancia/maple/business/types/username"
+
 	"github.com/google/uuid"
 )
 
 // Player represents information about an individual player.
 type Player struct {
-	ID       uuid.UUID
-	Name     name.Name
-	location Location
+	ID           uuid.UUID
+	FirstName    name.Name
+	LastName     name.Name
+	Username     username.Username
+	Email        mail.Address
+	PasswordHash []byte
+	Enabled      bool
+	DateCreated  time.Time
+	DateUpdated  time.Time
 }
 
 // NewPlayer represents what we expect from clients when creating a new player.
@@ -29,5 +38,5 @@ type NewPlayer struct {
 type UpdatePlayer struct {
 	FirstName *string
 	LastName  *string
-	Location
+	Password  *password.Password
 }
