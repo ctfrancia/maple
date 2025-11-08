@@ -2,8 +2,10 @@
 package playerbus
 
 import (
+	"context"
 	"errors"
 
+	"github.com/ctfrancia/maple/foundation/logger"
 	"github.com/google/uuid"
 )
 
@@ -14,20 +16,19 @@ var (
 	ErrAuthenticationFailure = errors.New("authentication failed")
 )
 
-// Storer declares the behaviour this package needs to persist and retrieve data.
+// Storer declares the behaviour this package needs to persist
+// and retrieve data.
 type Storer interface {
-	NewWithTx()
-	Create()
-	Update()
-	Delete()
-	Query()
+	Create(ctx context.Context, np NewPlayer) error
+	Query(ctx context.Context, filter any, orderBy any, page any) ([]Player, error)
+	Update(ctx context.Context, id uuid.UUID, np NewPlayer) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 // Business manages the set of APIs for the player api access.
 type Business struct {
-	log       any
-	playerbus any
-	storer    Storer
+	log    *logger.Logger
+	storer Storer
 }
 
 // NewBusiness creates a new instance of the player business.
@@ -38,7 +39,7 @@ func NewBusiness(log any, playerbus any, storer Storer) *Business {
 }
 
 // Create creates a new player.
-func (a *Business) Create() {
+func (a *Business) Create(ctx context.Context, np NewPlayer) error {
 }
 
 // Update updates an existing player.
