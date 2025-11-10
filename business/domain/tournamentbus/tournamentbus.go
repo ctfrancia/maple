@@ -3,8 +3,13 @@ package tournamentbus
 
 import (
 	"context"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/ctfrancia/maple/foundation/logger"
+
+	"github.com/ctfrancia/maple/foundation/otel"
 )
 
 // Storer is the interface for the persistence layer.
@@ -34,5 +39,19 @@ func NewBusiness(log *logger.Logger, storer Storer) *Business {
 
 // Create creates a new tournament.
 func (b *Business) Create(ctx context.Context, nt NewTournament) error {
+	ctx, span := otel.AddSpan(ctx, "business.tournamentbus.Create")
+	defer span.End()
+
+	now := time.Now()
+
+	t := Tournament{
+		ID:          uuid.New(),
+		Description: nt.Description,
+		Name:        nt.Name,
+		CreatedBy:   nt.CreatedBy,
+		PlayerID:    nt.PlayerID,
+		CreatedAt:   now,
+		UpdatedAt:   now,
+	}
 	return nil
 }
