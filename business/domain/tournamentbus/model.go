@@ -19,18 +19,28 @@ import (
 	"github.com/google/uuid"
 )
 
+type Status string
+
+const (
+	StatusDraft     Status = "draft"
+	StatusPublished Status = "published"
+	StatusClosed    Status = "closed"
+)
+
 // Tournament represents information about an individual tournament.
 type Tournament struct {
 	ID           uuid.UUID
 	Name         name.Name
 	CreatedBy    uuid.UUID // the website owner (api consumer ID)
 	PlayerID     uuid.UUID // the player ID (user in the website's system)
+	Enabled      bool
 	Description  description.Description
 	Poster       poster.Poster
 	Location     Location
 	Schedule     []Schedule
 	Contact      Contact
 	Registration Registration
+	Status       Status
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
