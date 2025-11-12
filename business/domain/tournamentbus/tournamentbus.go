@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/ctfrancia/maple/business/sdk/order"
 	"github.com/ctfrancia/maple/foundation/logger"
 	"github.com/ctfrancia/maple/foundation/otel"
 )
@@ -28,7 +29,7 @@ type Extension func() any
 type Business struct {
 	log    *logger.Logger
 	storer Storer
-	//userBus  userbus.Business
+	//userBus  userbus.Business // will be needed
 	//delegate any
 }
 
