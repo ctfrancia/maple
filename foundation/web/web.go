@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -81,6 +83,32 @@ func (a *App) HandlerFuncNoMid(method, group, path string, handlerFunc HandlerFu
 		if err := Respond(ctx, w, resp); err != nil {
 			a.log(ctx, "web-respond", err)
 			return
+		}
+	}
+
+	finalPath := path
+	if group != "" {
+		finalPath = "/" + group + path
+	}
+	finalPath = fmt.Sprintf("%s %s", method, finalPath)
+
+	a.mux.HandleFunc(finalPath, h)
+}
+
+func (a *App) HandlerFunc(method, group, path string, handlerFunc HandlerFunc, mw ...MidFunc) {
+	handlerFunc = wrapMiddleware(mw, handlerFunc)
+	handlerFunc = wrapMiddleware(a.mw, handlerFunc)
+
+	h := func(w http.ResponseWriter, r *http.Request) {
+		ctx := setTracer(r.Context(), a.tracer)
+		ctx = setWriter(ctx, w)
+
+		otel.GetTextMapPropagator().Inject(ctx, propagation.HeaderCarrier(w.Header()))
+
+		resp := handlerFunc(ctx, r)
+
+		if err := Respond(ctx, w, resp); err != nil {
+			a.log(ctx, "web-respond", "ERROR", err)
 		}
 	}
 

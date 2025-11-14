@@ -9,11 +9,13 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/ctfrancia/maple/business/sdk/order"
+	"github.com/ctfrancia/maple/business/sdk/page"
 	"github.com/ctfrancia/maple/foundation/logger"
 	"github.com/ctfrancia/maple/foundation/otel"
 )
 
-// Storer is the interface for the persistence layer.
+// Storer is the interface the business requires in order to
+// access data.
 type Storer interface {
 	Create(ctx context.Context, t Tournament) error
 	Update(ctx context.Context, t Tournament, ut UpdateTournament) error
@@ -90,6 +92,9 @@ func (b *Business) Delete(ctx context.Context, t Tournament) error {
 
 // Query retrieves a list of tournaments.
 func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Tournament, error) {
+	ctx, span := otel.AddSpan(ctx, "business.tournamentbus.Query")
+	defer span.End()
+
 	tournaments, err := b.storer.Query(ctx, filter, orderBy, page)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
@@ -100,6 +105,9 @@ func (b *Business) Query(ctx context.Context, filter QueryFilter, orderBy order.
 
 // QueryByID retrieves a Tournament by ID.
 func (b *Business) QueryByID(ctx context.Context, tID uuid.UUID) (Tournament, error) {
+	ctx, span := otel.AddSpan(ctx, "business.tournamentbus.QueryByID")
+	defer span.End()
+
 	tournament, err := b.storer.QueryByID(ctx, tID)
 	if err != nil {
 		return Tournament{}, fmt.Errorf("query: tournamentID[%s]: %w", tID, err)
