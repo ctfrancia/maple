@@ -82,5 +82,5 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	expvar.NewString("build").Set(cfg.Build)
 
-	// ------------------ DB SETUP ------------------
+	return nil
 }

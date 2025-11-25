@@ -32,7 +32,6 @@ type Business struct {
 	log    *logger.Logger
 	storer Storer
 	//userBus  userbus.Business // will be needed
-	//delegate any
 }
 
 // NewBusiness constructs a tournament business API for use.
@@ -56,8 +55,6 @@ func (b *Business) Create(ctx context.Context, nt NewTournament) (Tournament, er
 		Name:        nt.Name,
 		Description: nt.Description,
 		CreatedBy:   nt.CreatedBy,
-		PlayerID:    nt.PlayerID,
-		Enabled:     false,
 		Status:      StatusDraft,
 		CreatedAt:   now,
 		UpdatedAt:   now,
