@@ -10,6 +10,4 @@ type Config struct {
 
 func Routes() {
 	const version = "v1"
-
-	//app
 }

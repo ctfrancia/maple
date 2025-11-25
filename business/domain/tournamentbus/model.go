@@ -82,6 +82,7 @@ type Tournament struct {
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
 	Status              Status
+	Version             uint16
 }
 
 type Prize struct {
@@ -101,10 +102,10 @@ type NewTournament struct {
 // UpdateTournament contains information needed to update a user.
 // all fields are optional.
 type UpdateTournament struct {
+	ID          uuid.UUID
 	Name        *name.Name
 	Description *description.Description
 	Poster      *poster.Poster
-	// ...
 }
 
 // RequiredTournament represents the minimal information needed

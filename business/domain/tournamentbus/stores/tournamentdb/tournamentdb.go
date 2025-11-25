@@ -4,16 +4,27 @@ package tournamentdb
 import (
 	"context"
 
+	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	tb "github.com/ctfrancia/maple/business/domain/tournamentbus"
+	"github.com/ctfrancia/maple/business/sdk/order"
+	"github.com/ctfrancia/maple/business/sdk/page"
 	"github.com/ctfrancia/maple/foundation/logger"
 
+	"github.com/google/uuid"
+
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
+
+/*
+	QueryByID(ctx context.Context, tID uuid.UUID) (Tournament, error)
+
+*/
 
 type Storer interface {
 	NewWithTx(tx *gorm.DB) (Storer, error)
 	Create(ctx context.Context, t tb.Tournament) error
-	Update(ctx context.Context, t tb.Tournament) error
+	Update(ctx context.Context, t tb.Tournament, ut tb.UpdateTournament) error
 	Delete(ctx context.Context, t tb.Tournament) error
 	// Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]tb.Tournament, error)
 	// Count(ctx context.Context, filter QueryFilter) (int, error)
@@ -48,15 +59,29 @@ func (s *Store) Create(ctx context.Context, t tb.Tournament) error {
 	return s.db.WithContext(ctx).Create(&t).Error
 }
 
-// Update updates an existing tournament.
-// NOTE: here in the future then we will need to do pessimistic locking.
-// https://gorm.io/docs/transactions.html#Optimistic-Locking
-func (s *Store) Update(ctx context.Context, t tb.Tournament) error {
-	// TODO: Implement this - correctly.
-	return s.db.WithContext(ctx).Save(&t).Error
+// Update updates an existing tournament with pessimistic locking.
+func (s *Store) Update(ctx context.Context, t tb.Tournament, ut tb.UpdateTournament) error {
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var existing tb.Tournament
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&existing, t.ID).Error; err != nil {
+			return err
+		}
+
+		// Now update with the new values
+		return tx.Save(&t).Error
+	})
 }
 
 // Delete deletes an existing tournament.
 func (s *Store) Delete(ctx context.Context, t tb.Tournament) error {
-	return s.db.WithContext(ctx).Delete(ctx).Delete(&t).Error
+	return s.db.WithContext(ctx).Delete(&t).Error
+}
+
+func (s *Store) Query(ctx context.Context, filter tournamentbus.QueryFilter, orderBy order.By, page page.Page) ([]tb.Tournament, error) {
+	return nil, nil
+}
+
+func (s *Store) QueryByID(ctx context.Context, tID uuid.UUID) (tb.Tournament, error) {
+	return tb.Tournament{}, nil
 }

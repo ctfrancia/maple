@@ -2,6 +2,8 @@ package prometheus
 
 import (
 	"context"
+	"fmt"
+	"io"
 	"net/http"
 	"sync"
 	"time"
@@ -28,7 +30,7 @@ func New(log *logger.Logger, host, route string, readTO, writeTO, idleTO time.Du
 			ReadTimeout:  readTO,
 			WriteTimeout: writeTO,
 			IdleTimeout:  idleTO,
-			ErrorLog:     logger.NewStdLogger(l, logger.LevelError),
+			ErrorLog:     logger.NewStdLogger(log, logger.LevelError),
 		},
 	}
 
@@ -57,10 +59,25 @@ func (e *Exporter) Stop(shutdownTO time.Duration) {
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTO)
 	defer cancel()
 
-	e.log.Info(ctx, "prometheus", "status", "start shutdown..."
+	e.log.Info(ctx, "prometheus", "status", "start shutdown...")
 }
 
 func (e *Exporter) handler(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	w.Header().Set("Content-Type", "text/plain; version=0.0.4")
+	w.WriteHeader(http.StatusOK)
+
+	var data map[string]any
+	e.mu.Lock()
+	{
+		data = deepCopyMap(e.data)
+	}
+	e.mu.Unlock()
+
+	out(w, "", data)
+
+	e.log.Info(ctx, "prometheus", "metrics", fmt.Sprintf("expvar : (%d) : %s %s -> %s", http.StatusOK, r.Method, r.URL.Path, r.RemoteAddr))
 }
 
 func deepCopyMap(source map[string]any) map[string]any {
@@ -86,4 +103,25 @@ func deepCopyMap(source map[string]any) map[string]any {
 	}
 
 	return result
+}
+
+func out(w io.Writer, prefix string, data map[string]any) {
+	if prefix != "" {
+		prefix += "_"
+	}
+
+	for k, v := range data {
+		writeKey := fmt.Sprintf("%s%s", prefix, k)
+
+		switch vm := v.(type) {
+		case float64:
+			fmt.Fprintf(w, "%s %.f\n", writeKey, vm)
+
+		case map[string]any:
+			out(w, writeKey, vm)
+
+		default:
+			// Discard this value.
+		}
+	}
 }

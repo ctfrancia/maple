@@ -1,10 +1,10 @@
 package tournamentapp
 
 import (
-	"context"
+	//"context"
 	"net/http"
 
-	"github.com/ctfrancia/maple/foundation/web"
+	//"github.com/ctfrancia/maple/foundation/web"
 
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 )
@@ -19,6 +19,10 @@ func newApp(tBus tournamentbus.Business) *app {
 	}
 }
 
+func (a *app) create(w http.ResponseWriter, r *http.Request) {
+}
+
+/*
 func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 	return nil
 }
@@ -26,3 +30,4 @@ func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
 func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
 	return nil
 }
+*/

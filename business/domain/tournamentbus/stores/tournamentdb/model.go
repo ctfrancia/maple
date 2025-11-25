@@ -47,6 +47,7 @@ type contact struct {
 	Phone string `gorm:"type:varchar(20)"`
 	URL   string `gorm:"type:varchar(50)"`
 }
+
 type location struct {
 	ID       uuid.UUID
 	Name     string

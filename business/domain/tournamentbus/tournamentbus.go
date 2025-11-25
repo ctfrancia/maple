@@ -24,8 +24,15 @@ type Storer interface {
 	QueryByID(ctx context.Context, tID uuid.UUID) (Tournament, error)
 }
 
+type ExtBusiness interface {
+	Create(ctx context.Context, t NewTournament) (Tournament, error)
+	Update(ctx context.Context, t Tournament, ut UpdateTournament) error
+	Query(ctx context.Context, filter QueryFilter, orderBy order.By, page page.Page) ([]Tournament, error)
+	Delete(ctx context.Context, t Tournament) error
+}
+
 // Extension wraps additional business logic around an existing one.
-type Extension func() any
+type Extension func(ExtBusiness) ExtBusiness
 
 // Business manages the set of APIs for Tournament access
 type Business struct {
@@ -35,10 +42,18 @@ type Business struct {
 }
 
 // NewBusiness constructs a tournament business API for use.
-func NewBusiness(log *logger.Logger, storer Storer) *Business {
-	b := &Business{
+func NewBusiness(log *logger.Logger, storer Storer, extensions ...Extension) ExtBusiness {
+	b := ExtBusiness(&Business{
 		log:    log,
 		storer: storer,
+	})
+
+	for i := len(extensions) - 1; i >= 0; i-- {
+		ext := extensions[i]
+		if ext != nil {
+			b = ext(b)
+		}
+		// extensions[i].SetBusiness(b)
 	}
 
 	return b
@@ -68,15 +83,15 @@ func (b *Business) Create(ctx context.Context, nt NewTournament) (Tournament, er
 }
 
 // Update updates an existing tournament.
-func (b *Business) Update(ctx context.Context, t Tournament, ut UpdateTournament) (Tournament, error) {
+func (b *Business) Update(ctx context.Context, t Tournament, ut UpdateTournament) error {
 	ctx, span := otel.AddSpan(ctx, "business.tournamentbus.Update")
 	defer span.End()
 
 	if err := b.storer.Update(ctx, t, ut); err != nil {
-		return Tournament{}, fmt.Errorf("update: %w", err)
+		return fmt.Errorf("update: %w", err)
 	}
 
-	return Tournament{}, nil
+	return nil
 }
 
 // Delete removes a tournament from the system.
