@@ -53,7 +53,6 @@ func NewBusiness(log *logger.Logger, storer Storer, extensions ...Extension) Ext
 		if ext != nil {
 			b = ext(b)
 		}
-		// extensions[i].SetBusiness(b)
 	}
 
 	return b

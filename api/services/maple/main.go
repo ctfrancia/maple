@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ardanlabs/conf/v3"
+	"github.com/ctfrancia/maple/app/sdk/mux"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus/extensions/tournamentotel"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus/stores/tournamentdb"
@@ -196,6 +197,18 @@ func run(ctx context.Context, log *logger.Logger) error {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
+	cfgMux := mux.Config{
+		CORSAllowedOrigins: cfg.Web.CORSAllowedOrigins,
+		Build:              cfg.Build,
+		Tracer:             tracer,
+		DB:                 db,
+		BusConfig: mux.BusConfig{
+			TournamentBus: tournamentBus,
+		},
+	}
+
+	webAPI := mux.WebAPI(cfgMux)
+
 	api := http.Server{
 		Addr:         cfg.Web.APIHost,
 		Handler:      webAPI,
@@ -211,8 +224,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 		serverErrors <- api.ListenAndServe()
 	}()
-	// -------------------------------------------------------------------------
-	// Shutdown
+	// ===========================================================================================
+	// SHUTDOWN
+	// ===========================================================================================
 
 	select {
 	case err := <-serverErrors:
