@@ -1,25 +1,28 @@
 package tournamentapp
 
 import (
-	//"context"
+	"encoding/json"
 	"net/http"
-
-	//"github.com/ctfrancia/maple/foundation/web"
 
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 )
 
 type app struct {
-	//tournamentBus tournamentbus.TournamentBus
+	tournamentBus tournamentbus.ExtBusiness
 }
 
-func newApp(tBus tournamentbus.Business) *app {
+func newApp(tBus tournamentbus.ExtBusiness) *app {
 	return &app{
-		//tournamentBus: tBus,
+		tournamentBus: tBus,
 	}
 }
 
 func (a *app) create(w http.ResponseWriter, r *http.Request) {
+	var nt NewTournament
+	if err := json.NewDecoder(r.Body).Decode(&nt); err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
 }
 
 /*
