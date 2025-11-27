@@ -1,7 +1,6 @@
 package otel
 
 // this file is to satisfy the interface for the sampler
-
 import (
 	"fmt"
 

@@ -1,3 +1,4 @@
+// Package otel provides a wrapper around the OpenTelemetry SDK.
 package otel
 
 import (
@@ -33,7 +34,6 @@ type Config struct {
 func InitTracing(log *logger.Logger, cfg Config) (trace.TracerProvider, func(ctx context.Context), error) {
 	// will need to add my own settings that are not default
 	// will need to go look at opentelemetry docs
-
 	exporter, err := otlptrace.New(
 		context.Background(),
 		otlptracegrpc.NewClient(

@@ -40,6 +40,7 @@ func NewBusiness(log any, playerbus any, storer Storer) *Business {
 
 // Create creates a new player.
 func (a *Business) Create(ctx context.Context, np NewPlayer) error {
+	return nil
 }
 
 // Update updates an existing player.

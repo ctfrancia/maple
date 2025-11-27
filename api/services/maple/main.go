@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/ardanlabs/conf/v3"
+	"github.com/ctfrancia/maple/app/sdk/debug"
 	"github.com/ctfrancia/maple/app/sdk/mux"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus/extensions/tournamentotel"
@@ -122,7 +123,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 	log.Info(ctx, "startup", "status", "intitializing database support", "hostport", cfg.DB.Host)
 
-	dsn := ""
+	dsn := os.Getenv("DATABASE_URL")
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: glogger.Default.LogMode(glogger.Info),
 	})
@@ -182,11 +183,9 @@ func run(ctx context.Context, log *logger.Logger) error {
 	go func() {
 		log.Info(ctx, "startup", "status", "debug v1 router started", "host", cfg.Web.DebugHost)
 
-		/*
-			if err := http.ListenAndServe(cfg.Web.DebugHost, debug.Mux()); err != nil {
-				log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Web.DebugHost, "msg", err)
-			}
-		*/
+		if err := http.ListenAndServe(cfg.Web.DebugHost, debug.Mux()); err != nil {
+			log.Error(ctx, "shutdown", "status", "debug v1 router closed", "host", cfg.Web.DebugHost, "msg", err)
+		}
 	}()
 	// ===========================================================================================
 	// Start API Service

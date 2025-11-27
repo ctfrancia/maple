@@ -29,21 +29,104 @@ TEMPO           := grafana/tempo:2.9.0
 LOKI            := grafana/loki:3.5.0
 PROMTAIL        := grafana/promtail:3.5.0
 
-NAMESPACE       := chess-system
-CHESS_APP       := chess
+NAMESPACE       := maple-system
+MAPLE_APP       := maple
 AUTH_APP        := auth
 BASE_IMAGE_NAME := localhost/maple
 VERSION         := 0.0.1
-SALES_IMAGE     := $(BASE_IMAGE_NAME)/$(SALES_APP):$(VERSION)
+MAPLE_IMAGE     := $(BASE_IMAGE_NAME)/$(MAPLE_APP):$(VERSION)
 METRICS_IMAGE   := $(BASE_IMAGE_NAME)/metrics:$(VERSION)
 AUTH_IMAGE      := $(BASE_IMAGE_NAME)/$(AUTH_APP):$(VERSION)
+# VERSION       := "0.0.1-$(shell git rev-parse --short HEAD)"
+
+# ==============================================================================
+# Detect operating system and set the appropriate open command
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	OPEN_CMD := open
+else
+	OPEN_CMD := xdg-open
+endif
+
+# ==============================================================================
+# Install dependencies
+
+dev-gotooling:
+	go install github.com/divan/expvarmon@latest
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install golang.org/x/vuln/cmd/govulncheck@latest
+	go install golang.org/x/tools/cmd/goimports@latest
+
+dev-brew:
+	brew update
+	brew list pgcli || brew install pgcli
+	brew list watch || brew install watch
+
+dev-docker:
+	docker pull docker.io/$(GOLANG) & \
+	docker pull docker.io/$(ALPINE) & \
+	docker pull docker.io/$(POSTGRES) & \
+	docker pull docker.io/$(GRAFANA) & \
+	docker pull docker.io/$(PROMETHEUS) & \
+	docker pull docker.io/$(TEMPO) & \
+	docker pull docker.io/$(LOKI) & \
+	docker pull docker.io/$(PROMTAIL) & \
+	wait;
 
 # =========== BUILD CONTAINERS ===========
 
 build: maple metrics auth ## Build all containers
 
 maple: ## Build the maple container
+	docker build \
+		-f zoltan/docker/dockerfile.maple \
+		-t $(MAPLE_IMAGE) \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		.
 
 metrics: ## Build the metrics container
+	docker build \
+		-f zoltan/docker/dockerfile.metrics \
+		-t $(METRICS_IMAGE) \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		.
 
 auth: ## Build the auth container
+	docker build \
+		-f zoltan/docker/dockerfile.auth \
+		-t $(AUTH_IMAGE) \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		.
+
+# ==============================================================================
+# Metrivs and Tracing
+
+metrics-view-sc: ## View the metrics in a browser
+	expvarmon -ports="localhost:3010" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
+
+metrics-view: ## View the metrics in a browser
+	expvarmon -ports="localhost:4020" -endpoint="/metrics" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
+
+grafana: ## view the grafana dashboard
+	$(OPEN_CMD) http://localhost:3100/
+
+statsviz: ## view the statsviz dashboard
+	$(OPEN_CMD) http://localhost:3010/debug/statsviz
+
+
+# ==============================================================================
+# Audit
+
+audit: ## Run the audit service
+	CGO_ENABLED=0 go vet ./...
+	staticcheck -checks=all ./...
+	govulncheck ./...
+
+# ==============================================================================
+# RUN
+
+dev-run: build ## Run the application in dev mode locally

@@ -1,3 +1,5 @@
+// Package web provides a simple web framework for our application.
+// most likely can deprecate this in favor of chi
 package web
 
 import (
