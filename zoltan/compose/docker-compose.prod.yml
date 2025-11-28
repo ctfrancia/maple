@@ -1,0 +1,49 @@
+services:
+  database:
+    # No ports exposed
+    volumes:
+      - postgres-data:/var/lib/postgresql/data  # Named volume
+    networks:
+      - backend-network
+    restart: unless-stopped
+    cpu_count: 2
+
+  backend:
+    ports:
+      - "8080:8080"  # Only expose what's needed externally
+    networks:
+      - frontend-network
+      - backend-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/v1/liveness || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  auth:
+    # No ports exposed - internal only
+    expose:
+      - 6000
+    networks:
+      - backend-network
+    restart: unless-stopped
+
+  metrics:
+    ports:
+      - "4010:4010"  # Metrics endpoint
+    networks:
+      - backend-network
+    restart: unless-stopped
+    cpus: 1
+
+networks:
+  frontend-network:
+    driver: bridge
+  backend-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local

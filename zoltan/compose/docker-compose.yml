@@ -2,23 +2,10 @@ services:
   database:
     image: postgres:18.0
     container_name: database
-    ports:
-      # - "5432:5432" # shouldn't be exposed since we're using docker-compose
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - ./database-data:/var/lib/postgresql/data
-      - ./pg_hba.conf:/etc/pg_hba.conf
-
-  backend:
-    image: your-go-app
-    environment:
-      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
-    depends_on:
-      - database
-    command: ["-c", "hba_file=/etc/pg_hba.conf"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h localhost -U postgres"]
       interval: 10s
@@ -26,3 +13,36 @@ services:
       retries: 5
       start_period: 30s
 
+  backend:
+    image: maple/backend:${VERSION:-latest}
+    container_name: maple
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+      - MAPLE_AUTH_HOST=http://auth:6000
+    depends_on:
+      database:
+        condition: service_healthy
+
+  auth:
+    image: maple/auth:${VERSION:-latest}
+    container_name: auth
+    environment:
+      - AUTH_DB_HOST=database
+      - AUTH_DB_USER=${POSTGRES_USER}
+      - AUTH_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - AUTH_DB_NAME=${POSTGRES_DB}
+      - AUTH_JWT_SECRET=${AUTH_JWT_SECRET}
+      - AUTH_JWT_EXPIRATION=3600
+      - AUTH_JWT_ISSUER=maple
+    depends_on:
+      database:
+        condition: service_healthy
+
+  metrics:
+    image: maple/metrics:${VERSION:-latest}
+    container_name: metrics
+    environment:
+      - GOMAXPROCS=1
+      - METRICS_COLLECT_FROM=http://backend:4000/debug/vars
+    depends_on:
+      - backend

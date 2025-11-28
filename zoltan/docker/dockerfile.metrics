@@ -5,19 +5,21 @@ ARG BUILD_REF
 # Copy the source code into the container.
 COPY . /maple
 
-# Build the service binary. We are doing this last since this will be different
-# every time we run through this process.
+# Build the service binary with explicit output name
 WORKDIR /maple/api/services/metrics
-RUN go build -ldflags "-X main.build=${BUILD_REF}"
-
+RUN go build -v -o metrics -ldflags "-X main.build=${BUILD_REF}" && \
+    ls -la 
 
 # Run the Go Binary in Alpine.
 FROM alpine:3.22
 ARG BUILD_DATE
 ARG BUILD_REF
+
 RUN addgroup -g 1000 -S metrics && \
     adduser -u 1000 -h /maple -G metrics -S metrics
+
 COPY --from=build_metrics --chown=metrics:metrics /maple/api/services/metrics/metrics /maple/metrics
+
 WORKDIR /maple
 USER metrics
 CMD ["./metrics"]

@@ -83,7 +83,7 @@ maple: ## Build the maple container
 		-f zoltan/docker/dockerfile.maple \
 		-t $(MAPLE_IMAGE) \
 		--build-arg BUILD_REF=$(VERSION) \
-		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
 
 metrics: ## Build the metrics container
@@ -91,7 +91,7 @@ metrics: ## Build the metrics container
 		-f zoltan/docker/dockerfile.metrics \
 		-t $(METRICS_IMAGE) \
 		--build-arg BUILD_REF=$(VERSION) \
-		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
 
 auth: ## Build the auth container
@@ -99,7 +99,7 @@ auth: ## Build the auth container
 		-f zoltan/docker/dockerfile.auth \
 		-t $(AUTH_IMAGE) \
 		--build-arg BUILD_REF=$(VERSION) \
-		--build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
 
 # ==============================================================================
