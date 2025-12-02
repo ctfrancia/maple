@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	Log           *logger.Logger
-	TournamentBus tournamentbus.Business
+	TournamentBus tournamentbus.ExtBusiness
 	//AuthClient    *auth.Client
 }
 

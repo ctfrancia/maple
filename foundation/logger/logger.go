@@ -166,5 +166,4 @@ func (l *Logger) write(ctx context.Context, level Level, caller int, msg string,
 	r.Add(args...)
 
 	l.handler.Handle(ctx, r)
-
 }

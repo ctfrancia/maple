@@ -1,4 +1,4 @@
-# Contributing to [Project Name]
+# Contributing to [Maple]
 
 Thank you for your interest in contributing to this project! We welcome contributions from everyone and appreciate your help in making this project better.
 

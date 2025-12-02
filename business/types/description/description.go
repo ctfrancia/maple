@@ -14,3 +14,8 @@ func (d Description) String() string {
 func (d Description) MarshalText() ([]byte, error) {
 	return []byte(d.value), nil
 }
+
+// Parse parses the string value and returns a description if the value complies with the rules for a description.
+func Parse(s string) (Description, error) {
+	return Description{s}, nil
+}

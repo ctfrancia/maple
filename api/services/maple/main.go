@@ -152,6 +152,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// Initialize authentication support
 
 	//log.Info(ctx, "startup", "status", "initializing authentication support")
+	log.Warn(ctx, "startup", "status", "authentication support not yet implemented")
 
 	//authClient := authclient.New(log, cfg.Auth.Host)
 

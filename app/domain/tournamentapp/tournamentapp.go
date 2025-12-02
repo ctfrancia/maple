@@ -23,6 +23,21 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	t, err := toBusNewTournament(r.Context(), nt)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	tnmt, err := a.tournamentBus.Create(r.Context(), t)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(toAppTournament(tnmt))
 }
 
 /*

@@ -79,8 +79,8 @@ type Tournament struct {
 	Contact             Contact
 	CreatedBy           uuid.UUID
 	UpdatedBy           uuid.UUID
-	CreatedAt           time.Time
-	UpdatedAt           time.Time
+	DateCreated         time.Time
+	DateUpdated         time.Time
 	Status              Status
 	Version             uint16
 }
