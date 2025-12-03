@@ -26,7 +26,7 @@ services:
       database:
         condition: service_healthy
       tempo:
-        condition: service_healthy
+        condition: service_started
 
   auth:
     image: maple/auth:${VERSION:-latest}
@@ -80,12 +80,6 @@ services:
       - tempo-data:/var/tempo
     command: 
       - '-config.file=/etc/tempo.yml'
-    healthcheck:
-      test: ["CMD-SHELL", "wget  --tries=1 --spider http://localhost:3200/ready || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
 
   grafana:
     image: grafana/grafana:latest

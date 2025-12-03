@@ -20,6 +20,8 @@ RUN addgroup -g 1000 -S metrics && \
 
 COPY --from=build_metrics --chown=metrics:metrics /maple/api/services/metrics/metrics /maple/metrics
 
+RUN chmod +x /maple/metrics
+
 WORKDIR /maple
 USER metrics
 CMD ["./metrics"]

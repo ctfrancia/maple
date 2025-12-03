@@ -82,6 +82,7 @@ maple: ## Build the maple container
 	docker build \
 		-f zoltan/docker/dockerfile.maple \
 		-t $(MAPLE_IMAGE) \
+		-t $(BASE_IMAGE_NAME)/backend:dev \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
@@ -90,17 +91,21 @@ metrics: ## Build the metrics container
 	docker build \
 		-f zoltan/docker/dockerfile.metrics \
 		-t $(METRICS_IMAGE) \
+		-t $(BASE_IMAGE_NAME)/metrics:dev \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
 
 auth: ## Build the auth container
 	docker build \
+		--no-cache \
 		-f zoltan/docker/dockerfile.auth \
 		-t $(AUTH_IMAGE) \
+		-t $(BASE_IMAGE_NAME)/auth:dev \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
+
 
 # ==============================================================================
 # Metrics and Tracing
@@ -131,8 +136,40 @@ audit: ## Run the audit service
 #
 .PHONY: dev
 dev: build ## Run the application in dev mode locally
-	docker compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml --env-file zoltan/compose/.env.dev up
+	docker compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml --env-file zoltan/compose/.env.dev up --force-recreate
+
+.PHONY: dev-clean
+dev-clean: ## Clean and restart dev environment
+	docker-compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml down -v
+	make dev
 
 .PHONY: down-dev
 down-dev: ## stop the application in dev mode locally 
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+	docker compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml down -v
+
+.PHONY: build-no-cache
+build-no-cache: ## Build all images without cache
+	docker rmi -f localhost/maple/maple:$(VERSION) localhost/maple/maple:dev || true
+	docker rmi -f localhost/maple/metrics:$(VERSION) localhost/maple/metrics:dev || true
+	docker rmi -f localhost/maple/auth:$(VERSION) localhost/maple/auth:dev || true
+	docker build --no-cache \
+		-f zoltan/docker/dockerfile.maple \
+		-t localhost/maple/maple:$(VERSION) \
+		-t localhost/maple/maple:dev \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(DATE) \
+		.
+	docker build --no-cache \
+		-f zoltan/docker/dockerfile.metrics \
+		-t localhost/maple/metrics:$(VERSION) \
+		-t localhost/maple/metrics:dev \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(DATE) \
+		.
+	docker build --no-cache \
+		-f zoltan/docker/dockerfile.auth \
+		-t localhost/maple/auth:$(VERSION) \
+		-t localhost/maple/auth:dev \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(DATE) \
+		.
