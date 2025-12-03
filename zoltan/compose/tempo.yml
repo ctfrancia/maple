@@ -17,7 +17,3 @@ storage:
       path: /var/tempo/traces
     wal:
       path: /var/tempo/wal
-
-query_frontend:
-  search:
-    enabled: true

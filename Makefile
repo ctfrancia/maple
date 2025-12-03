@@ -103,7 +103,7 @@ auth: ## Build the auth container
 		.
 
 # ==============================================================================
-# Metrivs and Tracing
+# Metrics and Tracing
 
 metrics-view-sc: ## View the metrics in a browser
 	expvarmon -ports="localhost:3010" -vars="build,requests,goroutines,errors,panics,mem:memstats.HeapAlloc,mem:memstats.HeapSys,mem:memstats.Sys"
@@ -131,7 +131,7 @@ audit: ## Run the audit service
 #
 .PHONY: dev
 dev: build ## Run the application in dev mode locally
-	docker compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml up
+	docker compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml --env-file zoltan/compose/.env.dev up
 
 .PHONY: down-dev
 down-dev: ## stop the application in dev mode locally 
