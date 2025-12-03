@@ -20,6 +20,12 @@ type BusConfig struct {
 	TournamentBus tournamentbus.ExtBusiness
 }
 
+// AuthConfig contains all the mandarory components for the system.
+// TODO: implement auth
+type AuthConfig struct {
+	//Auth auth.Auth
+}
+
 // Config contains all the mandarory components for the system.
 type Config struct {
 	CORSAllowedOrigins []string
@@ -28,6 +34,7 @@ type Config struct {
 	Log                *logger.Logger
 	DB                 *gorm.DB
 	BusConfig          BusConfig
+	AuthConfig         AuthConfig
 }
 
 func WebAPI(cfg Config) http.Handler {
@@ -36,7 +43,8 @@ func WebAPI(cfg Config) http.Handler {
 		cfg.Tracer,
 	)
 	// Apply general middleware to the Chi router
-	app.Use(middleware.Otel(cfg.Tracer))
+	app.Use(middleware.Otel(cfg.Tracer)) // need to create span first
+	app.Use(middleware.Metrics)          // metrics has exemplars
 	app.Use(cors.Handler(cors.Options{
 		AllowedOrigins: cfg.CORSAllowedOrigins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

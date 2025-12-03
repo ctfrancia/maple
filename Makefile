@@ -128,5 +128,11 @@ audit: ## Run the audit service
 
 # ==============================================================================
 # RUN
+#
+.PHONY: dev
+dev: build ## Run the application in dev mode locally
+	docker compose -f zoltan/compose/docker-compose.yml -f zoltan/compose/docker-compose.dev.yml up
 
-dev-run: build ## Run the application in dev mode locally
+.PHONY: down-dev
+down-dev: ## stop the application in dev mode locally 
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml down

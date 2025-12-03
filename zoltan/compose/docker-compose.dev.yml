@@ -1,5 +1,7 @@
 services:
   database:
+    env_file:
+      - .env.dev
     ports:
       - "5432:5432"  # Expose for pgAdmin, DBeaver, etc.
     volumes:
@@ -9,28 +11,36 @@ services:
 
   backend:
     build:
-      context: ./backend  # Build locally
-      dockerfile: Dockerfile
+      # context: ./backend  # Build locally
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.maple
+    env_file:
+      - .env.dev
     ports:
       - "8080:8080"
       - "4000:4000"
     volumes:
-      - ./backend:/app  # Hot reload (if applicable)
+     # - ./backend:/app  # Hot reload (if applicable)
+      - ../..:/app  # Hot reload (if applicable)
     # Override with local image
     image: localhost/maple/backend:dev
 
   auth:
     build:
-      context: ./auth
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.auth
+    env_file:
+      - .env.dev
     ports:
       - "6000:6000"  # Expose for testing
     image: localhost/maple/auth:dev
 
   metrics:
+    env_file:
+      - .env.dev
     build:
-      context: ./metrics
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.metrics
     ports:
       - "4010:4010"
       - "4020:4020"

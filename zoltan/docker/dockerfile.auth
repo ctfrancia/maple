@@ -19,7 +19,7 @@ ARG BUILD_REF
 RUN addgroup -g 1000 -S auth && \
     adduser -u 1000 -h /maple -G auth -S auth
 COPY --from=build_auth --chown=auth:auth /maple/zoltan/keys/. /maple/zoltan/keys/.
-COPY --from=build_auth --chown=auth:auth /maple/api/services/auth/auth /maple/auth
+COPY --from=build_auth --chown=auth:auth /maple/api/services/auth /maple/auth
 WORKDIR /maple
 USER auth
 CMD ["./auth"]

@@ -70,8 +70,8 @@ func (b *Business) Create(ctx context.Context, nt NewTournament) (Tournament, er
 		Description: nt.Description,
 		CreatedBy:   nt.CreatedBy,
 		Status:      StatusDraft,
-		CreatedAt:   now,
-		UpdatedAt:   now,
+		DateCreated: now,
+		DateUpdated: now,
 	}
 
 	if err := b.storer.Create(ctx, t); err != nil {

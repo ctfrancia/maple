@@ -15,8 +15,8 @@ RUN go mod download
 COPY . /maple
 
 # Build the admin binary.
-WORKDIR /maple/api/tooling/admin
-RUN go build -ldflags "-X main.build=${BUILD_REF}"
+# WORKDIR /maple/api/tooling/admin
+# RUN go build -ldflags "-X main.build=${BUILD_REF}"
 
 # Build the service binary.
 WORKDIR /maple/api/services/maple
@@ -29,8 +29,8 @@ ARG BUILD_DATE
 ARG BUILD_REF
 RUN addgroup -g 1000 -S maple && \
     adduser -u 1000 -h /maple -G maple -S maple
-COPY --from=build_maple --chown=maple:maple /maple/api/tooling/admin/admin /maple/admin
-COPY --from=build_maple --chown=maple:maple /maple/api/services/maple/maple /maple/maple
+# COPY --from=build_maple --chown=maple:maple /maple/api/tooling/admin/admin /maple/admin
+COPY --from=build_maple --chown=maple:maple /maple/api/services/maple /maple/maple
 WORKDIR /maple
 USER maple
 CMD ["./maple"]
