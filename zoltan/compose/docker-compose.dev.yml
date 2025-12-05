@@ -1,0 +1,39 @@
+services:
+  database:
+    ports:
+      - "5432:5432"  # Expose for pgAdmin, DBeaver, etc.
+    volumes:
+      - ./database-data:/var/lib/postgresql # ./database-data:/var/lib/postgresql/data  # Local directory
+      - ./pg_hba.conf:/etc/pg_hba.conf
+    command: ["-c", "hba_file=/etc/pg_hba.conf"]
+
+  backend:
+    build:
+      # context: ./backend  # Build locally
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.maple
+    ports:
+      - "8080:8080"
+      - "4000:4000"
+    volumes:
+     # - ./backend:/app  # Hot reload (if applicable)
+      - ../..:/app  # Hot reload (if applicable)
+    # Override with local image
+    image: localhost/maple/backend:dev
+
+  auth:
+    build:
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.auth
+    ports:
+      - "6000:6000"  # Expose for testing
+    image: localhost/maple/auth:dev
+
+  metrics:
+    build:
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.metrics
+    ports:
+      - "4010:4010"
+      - "4020:4020"
+    image: localhost/maple/metrics:dev

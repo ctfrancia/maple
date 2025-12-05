@@ -1,0 +1,34 @@
+FROM golang:1.25 AS build_metrics
+ENV CGO_ENABLED=0
+ARG BUILD_REF
+
+# Copy the source code into the container.
+COPY . /maple
+
+# Build the service binary with explicit output name
+WORKDIR /maple/api/services/metrics
+RUN go build -v -o metrics -ldflags "-X main.build=${BUILD_REF}" && \
+    ls -la 
+
+# Run the Go Binary in Alpine.
+FROM alpine:3.22
+ARG BUILD_DATE
+ARG BUILD_REF
+
+RUN addgroup -g 1000 -S metrics && \
+    adduser -u 1000 -h /maple -G metrics -S metrics
+
+COPY --from=build_metrics --chown=metrics:metrics /maple/api/services/metrics/metrics /maple/metrics
+
+RUN chmod +x /maple/metrics
+
+WORKDIR /maple
+USER metrics
+CMD ["./metrics"]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.title="metrics" \
+      org.opencontainers.image.authors="Christian Francia <christian.francia@hey.com>" \
+      org.opencontainers.image.source="https://github.com/ctfrancia/maple" \
+      org.opencontainers.image.revision="${BUILD_REF}" \
+      org.opencontainers.image.vendor=""

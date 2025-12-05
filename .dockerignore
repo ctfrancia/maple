@@ -1,0 +1,11 @@
+zoltan/compose/database-data
+zoltan/compose/grafana-data
+zoltan/compose/prometheus-data
+zoltan/compose/tempo-data
+**/node_modules
+**/.git
+**/.vscode
+**/.idea
+**/tmp
+**/temp
+**/*.log

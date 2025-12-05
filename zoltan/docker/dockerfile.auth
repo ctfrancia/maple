@@ -1,0 +1,32 @@
+# Build the Go Binary.
+FROM golang:1.25 AS build_auth
+ENV CGO_ENABLED=0
+ARG BUILD_REF
+
+# Copy the source code into the container.
+COPY . /maple
+
+# Build the service binary. We are doing this last since this will be different
+# every time we run through this process.
+WORKDIR /maple/api/services/auth
+RUN go build -ldflags "-X main.build=${BUILD_REF}" -o auth
+
+
+# Run the Go Binary in Alpine.
+FROM alpine:3.22
+ARG BUILD_DATE
+ARG BUILD_REF
+RUN addgroup -g 1000 -S auth && \
+    adduser -u 1000 -h /maple -G auth -S auth
+COPY --from=build_auth --chown=auth:auth /maple/zoltan/keys/. /maple/zoltan/keys/.
+COPY --from=build_auth --chown=auth:auth /maple/api/services/auth/auth /maple/auth
+WORKDIR /maple
+USER auth
+CMD ["./auth"]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.title="auth" \
+      org.opencontainers.image.authors="Christian Francia <christian.francia@hey.com>" \
+      org.opencontainers.image.source="https://github.com/ctfrancia/maple" \
+      org.opencontainers.image.revision="${BUILD_REF}" \
+      org.opencontainers.image.vendor=""

@@ -1,0 +1,46 @@
+# Build the Go Binary.
+FROM golang:1.25 AS build_maple
+ENV CGO_ENABLED=0
+ARG BUILD_REF
+
+# Create the service directory and the copy the module files first and then
+# download the dependencies. If this doesn't change, we won't need to do this
+# again in future builds.
+RUN mkdir /maple
+COPY go.* /maple/
+WORKDIR /maple
+RUN go mod download
+
+# Copy the source code into the container.
+COPY . /maple
+
+# Build the admin binary.
+# WORKDIR /maple/api/tooling/admin
+# RUN go build -ldflags "-X main.build=${BUILD_REF}"
+
+# Build the service binary.
+WORKDIR /maple/api/services/maple
+RUN go build -ldflags "-X main.build=${BUILD_REF}" -o maple
+
+
+# Run the Go Binary in Alpine.
+FROM alpine:3.22
+ARG BUILD_DATE
+ARG BUILD_REF
+RUN addgroup -g 1000 -S maple && \
+    adduser -u 1000 -h /maple -G maple -S maple
+# COPY --from=build_maple --chown=maple:maple /maple/api/tooling/admin/admin /maple/admin
+COPY --from=build_maple --chown=maple:maple /maple/api/services/maple/maple /maple/maple
+
+RUN chmod +x /maple/maple
+
+WORKDIR /maple
+USER maple
+CMD ["./maple"]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.title="maple-service" \
+    org.opencontainers.image.authors="Christian Francia <christian.francia@hey.com>" \
+    org.opencontainers.image.source="https://github.com/ctfrancia/maple" \
+    org.opencontainers.image.revision="${BUILD_REF}" \
+    org.opencontainers.image.vendor=""
