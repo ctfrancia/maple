@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ctfrancia/maple/app/sdk/mux/middleware"
+	//"github.com/ctfrancia/maple/app/sdk/mux/middleware"
+	"github.com/ctfrancia/maple/app/domain/tournamentapp"
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
@@ -40,17 +41,47 @@ type App struct {
 	origins []string
 }
 
-// NewChiApp creates an App value that handle a set of routes for the application using chi
-func NewChiApp(log Logger, tracer trace.Tracer, mw ...http.Handler) *chi.Mux {
-	r := chi.NewRouter()
+// App2 is the entrypoint into our application and what configures our
+// context object for each of our http handlers.
+type App2 struct {
+	log     Logger
+	tracer  trace.Tracer
+	mux     *chi.Mux
+	otmux   http.Handler
+	mw      []MidFunc
+	mids    []http.Handler
+	origins []string
+}
 
-	r.Use(middleware.Otel(tracer))
+// NewChiApp creates an App value that handle a set of routes for the application using chi
+// the reponsibility of this function is to mount the api routes
+func NewChiApp(log Logger, tracer trace.Tracer) *chi.Mux {
+	r := chi.NewRouter()
+	const apiT = "api/tournament"
+
+	//r.Mount(apiT, tournamentapp.Routes(tCfg))
 
 	return r
 }
 
+func NewApp2(log Logger, tracer trace.Tracer, mw ...MidFunc) *App2 {
+	mux := chi.NewRouter()
+
+	return &App2{
+		log:    log,
+		tracer: tracer,
+		mux:    mux,
+		otmux:  otelhttp.NewHandler(mux, "request"),
+		mw:     mw,
+	}
+}
+
+func (a *App2) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	a.otmux.ServeHTTP(w, r)
+}
+
 // NewApp creates an App value that handle a set of routes for the application
-// DEPRECATED - use NewGinApp
+// DEPRECATED - use NewChiApp
 func NewApp(log Logger, tracer trace.Tracer, mw ...MidFunc) *App {
 	// Create an otel http handler which wraps our router. This will
 	// start the initial span and annotate it with info about the request/trusted.

@@ -13,18 +13,15 @@ type Config struct {
 	//AuthClient    *auth.Client
 }
 
-func Routes(cfg Config) chi.Router {
-	const v1 = "v1"
-	api := newApp(cfg.TournamentBus)
+func V1Routes(cfg Config) chi.Router {
 	r := chi.NewRouter()
+	api := newApp(cfg.TournamentBus)
 
 	// Domain-specific middleware
 	//r.Use(middleware.TournamentAuth)
 
-	r.Route("/"+v1, func(v1 chi.Router) {
+	r.Route("/v1", func(v1 chi.Router) {
 		v1.Post("/tournament", api.create)
-		//v1.Get("/tournaments", api.query)
-		//v1.Get("/tournament/{id}", api.queryByID)
 	})
 
 	return r

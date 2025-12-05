@@ -2,18 +2,33 @@
 package debug
 
 import (
-	"expvar"
-	"net/http"
-	"net/http/pprof"
+	//"expvar"
+	//"net/http"
+	//"net/http/pprof"
 
 	"github.com/arl/statsviz"
+	"github.com/go-chi/chi/v5"
+	// "github.com/gin-gonic/gin"
 )
 
 // Mux registers all the debug routes from the standard library into a new mux
 // bypassing the use of the DefaultServerMux. Using the DefaultServerMux would
 // be a security risk since a dependency could inject a handler into our service
 // without us knowing it.
+/*
 func Mux() *http.ServeMux {
+	r := chi.NewRouter()
+	srv, _ := statsviz.NewServer()
+
+	r.Get("/debug/statsviz/ws", srv.Ws())
+	//r.HandleFunc("/debug/pprof/", pprof.Index)
+	//r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	//r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	//r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	//r.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	//r.Handle("/debug/vars/", expvar.Handler())
+	r.Handle("/debug/statsviz/*", srv.Index())
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/debug/pprof/", pprof.Index)
@@ -23,7 +38,29 @@ func Mux() *http.ServeMux {
 	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	mux.Handle("/debug/vars/", expvar.Handler())
 
-	statsviz.Register(mux)
+	//statsviz.Register(m)
 
-	return mux
+	return r
+}
+*/
+
+// Mux registers all the debug routes from the standard library into a new mux
+// bypassing the use of the DefaultServerMux. Using the DefaultServerMux would
+// be a security risk since a dependency could inject a handler into our service
+// without us knowing it.
+// FIXME: this is not working
+func Mux() *chi.Mux {
+	r := chi.NewRouter()
+	srv, _ := statsviz.NewServer() // we aren't passing any opts so won't error
+
+	r.Get("/debug/statsviz/ws", srv.Ws())
+	// r.HandleFunc("/debug/pprof/", pprof.Index)
+	// r.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	// r.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	// r.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	// r.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	// r.Handle("/debug/vars/", expvar.Handler())
+	r.Handle("/debug/statsviz/*", srv.Index())
+
+	return r
 }
