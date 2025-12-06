@@ -191,7 +191,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// ===========================================================================================
 	// Start API Service
 	// ===========================================================================================
-
 	log.Info(ctx, "startup", "status", "initializing V1 API support")
 
 	shutdown := make(chan os.Signal, 1)
@@ -221,7 +220,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	serverErrors := make(chan error, 1)
 	go func() {
 		log.Info(ctx, "startup", "status", "api router started", "host", api.Addr)
-
 		serverErrors <- api.ListenAndServe()
 	}()
 	// ===========================================================================================
