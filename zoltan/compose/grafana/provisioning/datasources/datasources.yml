@@ -5,16 +5,37 @@ datasources:
     type: prometheus
     access: proxy
     url: http://prometheus:9090
-    isDefault: true
+    isDefault: false  # Changed to false since Loki will be default
     jsonData:
       exemplarTraceIdDestinations:
         - name: traceID
           datasourceUid: tempo
     editable: true
-
+  
   - name: Tempo
     type: tempo
     access: proxy
     url: http://tempo:3200
     uid: tempo
     editable: true
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+      tracesToMetrics:
+        datasourceUid: prometheus
+  
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    uid: loki
+    isDefault: true
+    editable: true
+    jsonData:
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: "trace_id[\"=:]([0-9a-f-]+)"
+          name: TraceID
+          url: '$${__value.raw}'

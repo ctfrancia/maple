@@ -1,0 +1,39 @@
+# Build the Go Binary.
+FROM golang:1.25 AS build_maple
+ENV CGO_ENABLED=0
+ARG BUILD_REF
+
+# Copy the source code into the container.
+COPY . /maple
+
+# Build the service binary.
+WORKDIR /maple/api/services/maple
+RUN GOOS=linux GOARCH=amd64 go build -ldflags "-X main.build=${BUILD_REF}" -o maple && \
+    chmod +x maple && \
+    ls -la maple
+
+# Run the Go Binary in Alpine.
+FROM alpine:3.22
+ARG BUILD_DATE
+ARG BUILD_REF
+
+RUN addgroup -g 1000 -S maple && \
+    adduser -u 1000 -h /maple -G maple -S maple
+
+COPY --from=build_maple --chown=maple:maple /maple/api/services/maple/maple /maple/maple
+
+# Debug: verify the binary was copied correctly
+RUN ls -la /maple/maple && \
+    apk add --no-cache file && \
+    file /maple/maple
+
+WORKDIR /maple
+USER maple
+CMD ["./maple"]
+
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.title="maple-service" \
+    org.opencontainers.image.authors="Christian Francia <christian.francia@hey.com>" \
+    org.opencontainers.image.source="https://github.com/ctfrancia/maple" \
+    org.opencontainers.image.revision="${BUILD_REF}" \
+    org.opencontainers.image.vendor=""

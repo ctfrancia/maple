@@ -2,7 +2,7 @@
 package debug
 
 import (
-	//"expvar"
+	"expvar"
 	//"net/http"
 	//"net/http/pprof"
 
@@ -61,6 +61,7 @@ func Mux() *chi.Mux {
 	// r.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	// r.Handle("/debug/vars/", expvar.Handler())
 	r.Handle("/debug/statsviz/*", srv.Index())
+	r.Handle("/debug/vars", expvar.Handler())
 
 	return r
 }

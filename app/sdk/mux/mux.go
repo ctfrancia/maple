@@ -9,8 +9,6 @@ import (
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/foundation/logger"
 
-	//"github.com/ctfrancia/maple/foundation/web"
-
 	"github.com/go-chi/chi/v5"
 	chimid "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"

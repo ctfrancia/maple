@@ -1,5 +1,5 @@
 // Package maple is the main package for the maple architecture.
-package maple
+package main
 
 import (
 	"context"
