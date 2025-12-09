@@ -43,6 +43,7 @@ func WebAPI(cfg Config) http.Handler {
 	r := chi.NewRouter()
 	//app := web.NewApp2(cfg.Log.Info, cfg.Tracer)
 	// Apply general middleware to the Chi router
+	r.Use(middleware.LoggingMiddleware(cfg.Log))
 	r.Use(middleware.Otel(cfg.Tracer)) // need to create span first
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: cfg.CORSAllowedOrigins,

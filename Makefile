@@ -120,7 +120,7 @@ grafana: ## view the grafana dashboard
 	$(OPEN_CMD) http://localhost:3100/
 
 statsviz: ## view the statsviz dashboard
-	$(OPEN_CMD) http://localhost:3010/debug/statsviz
+	$(OPEN_CMD) http://localhost:3010/debug/statsviz/
 
 
 # ==============================================================================

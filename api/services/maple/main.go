@@ -199,6 +199,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	cfgMux := mux.Config{
 		CORSAllowedOrigins: cfg.Web.CORSAllowedOrigins,
 		Build:              cfg.Build,
+		Log:                log,
 		Tracer:             tracer,
 		DB:                 db,
 		BusConfig: mux.BusConfig{
