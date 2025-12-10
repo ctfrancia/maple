@@ -2,7 +2,6 @@ package tournamentapp
 
 import (
 	"context"
-	"errors"
 	"strings"
 	"time"
 

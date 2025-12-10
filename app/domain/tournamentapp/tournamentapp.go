@@ -28,7 +28,7 @@ func (a *app) create(w http.ResponseWriter, r *http.Request) (*web.Response, err
 
 	t, err := toBusNewTournament(r.Context(), nt)
 	if err != nil {
-		return nil, err
+		return &web.Response{Status: http.StatusBadRequest}, err
 	}
 
 	tnmt, err := a.tournamentBus.Create(r.Context(), t)
