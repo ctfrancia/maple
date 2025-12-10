@@ -41,10 +41,8 @@ type Config struct {
 
 func WebAPI(cfg Config) http.Handler {
 	r := chi.NewRouter()
-	//app := web.NewApp2(cfg.Log.Info, cfg.Tracer)
-	// Apply general middleware to the Chi router
 	r.Use(middleware.LoggingMiddleware(cfg.Log))
-	r.Use(middleware.Otel(cfg.Tracer)) // need to create span first
+	r.Use(middleware.Otel(cfg.Tracer))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins: cfg.CORSAllowedOrigins,
 		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -53,21 +51,10 @@ func WebAPI(cfg Config) http.Handler {
 	r.Use(chimid.Recoverer)
 
 	tCfg := tournamentapp.Config{Log: cfg.Log, TournamentBus: cfg.BusConfig.TournamentBus}
+	//r.Mount("/api", tournamentapp.V1Routes(tCfg))
 	r.Mount("/api", tournamentapp.V1Routes(tCfg))
 	// r.Mount("/api", userApp.V1Routes(tCfg))
 	// r.Mount("/api", Player.V1Routes(tCfg))
-	/*
-		app.mux.Use(middleware.Otel(cfg.Tracer)) // need to create span first
-
-		app.Use(middleware.Otel(cfg.Tracer)) // need to create span first
-		app.Use(middleware.Metrics)          // metrics has exemplars
-		app.Use(cors.Handler(cors.Options{
-			AllowedOrigins: cfg.CORSAllowedOrigins,
-			AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		}))
-		app.Use(chimid.Recoverer)
-	*/
 
 	return otelhttp.NewHandler(r, "request")
 }

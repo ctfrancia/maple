@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ctfrancia/maple/app/sdk/errs"
 	"github.com/ctfrancia/maple/app/sdk/mid"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/business/types/description"
@@ -30,24 +31,24 @@ type NewTournament struct {
 }
 
 func toBusNewTournament(ctx context.Context, nt NewTournament) (tournamentbus.NewTournament, error) {
-	errs := make(map[string]string)
+	validationErr := errs.NewValidationError()
 	ID, err := mid.GetUserID(ctx)
 	if err != nil {
-		errs["creator_id"] = "implement me"
+		validationErr.Add("created_by", "cannot be empty")
 	}
 
 	name, err := name.Parse(strings.TrimSpace(nt.Name))
 	if err != nil {
-		errs["name"] = "implement me"
+		validationErr.Add("name", "cannot be empty")
 	}
 
 	desc, err := description.Parse(strings.TrimSpace(nt.Description))
 	if err != nil {
-		errs["description"] = "implement me"
+		validationErr.Add("description", "cannot be empty")
 	}
 
-	if len(errs) != 0 {
-		return tournamentbus.NewTournament{}, errors.New("implement me")
+	if validationErr.HasErrors() {
+		return tournamentbus.NewTournament{}, validationErr
 	}
 
 	return tournamentbus.NewTournament{
@@ -58,7 +59,6 @@ func toBusNewTournament(ctx context.Context, nt NewTournament) (tournamentbus.Ne
 }
 
 // ============================================================================
-
 func toAppTournament(t tournamentbus.Tournament) Tournament {
 	return Tournament{
 		ID:          t.ID.String(),
