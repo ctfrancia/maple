@@ -6,10 +6,12 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: false  # Changed to false since Loki will be default
+    uid: prometheus
     jsonData:
       exemplarTraceIdDestinations:
         - name: traceID
           datasourceUid: tempo
+          urlDisplayLabel: 'View trace'
     editable: true
   
   - name: Tempo
@@ -25,6 +27,8 @@ datasources:
         spanEndTimeShift: '1h'
       tracesToMetrics:
         datasourceUid: prometheus
+      nodeGraph:
+        enabled: true
   
   - name: Loki
     type: loki

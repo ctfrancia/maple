@@ -17,7 +17,7 @@ type Config struct {
 func V1Routes(cfg Config) chi.Router {
 	r := chi.NewRouter()
 	api := newApp(cfg.TournamentBus)
-	v1BasePath := "v1/tournament"
+	v1BasePath := "/v1/tournament"
 
 	// Domain-specific middleware
 	//r.Use(middleware.TournamentAuth)
