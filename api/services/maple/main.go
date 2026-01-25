@@ -1,5 +1,5 @@
 // Package maple is the main package for the maple architecture.
-package maple
+package main
 
 import (
 	"context"
@@ -24,6 +24,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	glogger "gorm.io/gorm/logger"
+
+	"github.com/joho/godotenv"
 )
 
 var build = "develop" // set during build process to be hash of git commit
@@ -52,6 +54,13 @@ func main() {
 }
 
 func run(ctx context.Context, log *logger.Logger) error {
+	env := os.Getenv("APP_ENV")
+	if env == "" || env == "development" {
+		if err := godotenv.Load("zoltan/compose/.env.dev"); err != nil {
+			log.Info(ctx, "startup", "warn", "Warning: .env.dev file not found")
+		}
+	}
+
 	log.Info(ctx, "startup", "GOMAXPROCS", runtime.GOMAXPROCS(0))
 
 	//-------------- CONFIG --------------
@@ -120,15 +129,22 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// ===========================================================================================
 	//  ----------- DATABASE SETUP TODO -----------
 	// ===========================================================================================
-
 	log.Info(ctx, "startup", "status", "intitializing database support", "hostport", cfg.DB.Host)
 
 	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		return fmt.Errorf("DATABASE_URL not set")
+	}
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: glogger.Default.LogMode(glogger.Info),
 	})
 	if err != nil {
 		return fmt.Errorf("opening database: %w", err)
+	}
+
+	err = tournamentdb.CreateMigration(db)
+	if err != nil {
+		return fmt.Errorf("creating migration: %w", err)
 	}
 
 	psql, err := db.DB()
@@ -191,7 +207,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// ===========================================================================================
 	// Start API Service
 	// ===========================================================================================
-
 	log.Info(ctx, "startup", "status", "initializing V1 API support")
 
 	shutdown := make(chan os.Signal, 1)
@@ -200,6 +215,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 	cfgMux := mux.Config{
 		CORSAllowedOrigins: cfg.Web.CORSAllowedOrigins,
 		Build:              cfg.Build,
+		Log:                log,
 		Tracer:             tracer,
 		DB:                 db,
 		BusConfig: mux.BusConfig{
@@ -221,7 +237,6 @@ func run(ctx context.Context, log *logger.Logger) error {
 	serverErrors := make(chan error, 1)
 	go func() {
 		log.Info(ctx, "startup", "status", "api router started", "host", api.Addr)
-
 		serverErrors <- api.ListenAndServe()
 	}()
 	// ===========================================================================================

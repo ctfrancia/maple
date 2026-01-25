@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ctfrancia/maple/app/sdk/web"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 )
 
@@ -17,35 +18,58 @@ func newApp(tBus tournamentbus.ExtBusiness) *app {
 	}
 }
 
-func (a *app) create(w http.ResponseWriter, r *http.Request) {
+// create creates a new tournament.
+// func (a *app) create(w http.ResponseWriter, r *http.Request) {
+func (a *app) create(w http.ResponseWriter, r *http.Request) (*web.Response, error) {
 	var nt NewTournament
 	if err := json.NewDecoder(r.Body).Decode(&nt); err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return &web.Response{Status: http.StatusBadRequest}, err
 	}
 
 	t, err := toBusNewTournament(r.Context(), nt)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return &web.Response{Status: http.StatusBadRequest}, err
 	}
 
 	tnmt, err := a.tournamentBus.Create(r.Context(), t)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(toAppTournament(tnmt))
+	return &web.Response{
+		Data:   toAppTournament(tnmt),
+		Status: http.StatusOK,
+	}, nil
 }
 
-/*
-func (a *app) create(ctx context.Context, r *http.Request) web.Encoder {
-	return nil
+// query retrieves a list of tournaments based on the provided filter.
+// TODO: implement query
+func (a *app) query(w http.ResponseWriter, r *http.Request) (*web.Response, error) {
+	date := r.URL.Query().Get("date")
+	player := r.URL.Query().Get("player")
+	if date != "" && player != "" {
+		return nil, nil
+	}
+
+	return nil, nil
 }
 
-func (a *app) query(ctx context.Context, r *http.Request) web.Encoder {
-	return nil
+// fetch retrieves a tournament by ID.
+func (a *app) fetch(w http.ResponseWriter, r *http.Request) (*web.Response, error) {
+	return nil, nil
 }
-*/
+
+// delete removes a tournament by ID.
+func (a *app) delete(w http.ResponseWriter, r *http.Request) (*web.Response, error) {
+	return nil, nil
+}
+
+// update updates a tournament by ID.
+func (a *app) update(w http.ResponseWriter, r *http.Request) (*web.Response, error) {
+	return nil, nil
+}
+
+// partialUpdate updates a tournament by ID with the provided values.
+func (a *app) partialUpdate(w http.ResponseWriter, r *http.Request) (*web.Response, error) {
+	return nil, nil
+}

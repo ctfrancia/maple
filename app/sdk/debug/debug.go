@@ -3,27 +3,37 @@ package debug
 
 import (
 	"expvar"
-	"net/http"
 	"net/http/pprof"
 
 	"github.com/arl/statsviz"
+	"github.com/go-chi/chi/v5"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Mux registers all the debug routes from the standard library into a new mux
 // bypassing the use of the DefaultServerMux. Using the DefaultServerMux would
 // be a security risk since a dependency could inject a handler into our service
 // without us knowing it.
-func Mux() *http.ServeMux {
-	mux := http.NewServeMux()
+func Mux() *chi.Mux {
+	r := chi.NewRouter()
+	srv, _ := statsviz.NewServer() // we aren't passing any opts so won't error
 
-	mux.HandleFunc("/debug/pprof/", pprof.Index)
-	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
-	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
-	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
-	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
-	mux.Handle("/debug/vars/", expvar.Handler())
-
-	statsviz.Register(mux)
-
-	return mux
+	r.Get("/debug/statsviz/ws", srv.Ws())
+	r.Get("/debug/pprof/", pprof.Index)
+	r.Get("/debug/pprof/cmdline", pprof.Cmdline)
+	r.Get("/debug/pprof/profile", pprof.Profile)
+	r.Get("/debug/pprof/symbol", pprof.Symbol)
+	r.Get("/debug/pprof/trace", pprof.Trace)
+	r.Handle("/debug/statsviz/*", srv.Index())
+	r.Handle("/debug/vars", expvar.Handler())
+	//r.Handle("/metrics", promhttp.Handler())
+	// Enable exemplars in the handler
+	r.Handle("/metrics", promhttp.HandlerFor(
+		prometheus.DefaultGatherer,
+		promhttp.HandlerOpts{
+			EnableOpenMetrics: true, // This enables exemplar support
+		},
+	))
+	return r
 }

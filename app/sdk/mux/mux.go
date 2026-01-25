@@ -4,14 +4,13 @@ package mux
 import (
 	"net/http"
 
+	"github.com/ctfrancia/maple/app/domain/tournamentapp"
 	"github.com/ctfrancia/maple/app/sdk/mux/middleware"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/foundation/logger"
-	"github.com/ctfrancia/maple/foundation/web"
 
+	"github.com/go-chi/chi/v5"
 	chimid "github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
-
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm"
 )
@@ -38,19 +37,17 @@ type Config struct {
 }
 
 func WebAPI(cfg Config) http.Handler {
-	app := web.NewChiApp(
-		cfg.Log.Info,
-		cfg.Tracer,
-	)
-	// Apply general middleware to the Chi router
-	app.Use(middleware.Otel(cfg.Tracer)) // need to create span first
-	app.Use(middleware.Metrics)          // metrics has exemplars
-	app.Use(cors.Handler(cors.Options{
-		AllowedOrigins: cfg.CORSAllowedOrigins,
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders: []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-	}))
-	app.Use(chimid.Recoverer)
+	r := chi.NewRouter()
+	r.Use(middleware.Otel(cfg.Tracer))
+	r.Use(middleware.LoggingMiddleware(cfg.Log))
+	r.Use(middleware.Metrics())
+	r.Use(chimid.Recoverer)
 
-	return app
+	tCfg := tournamentapp.Config{Log: cfg.Log, TournamentBus: cfg.BusConfig.TournamentBus}
+	r.Mount("/api", tournamentapp.V1Routes(tCfg))
+	//r.Mount("/api", tournamentapp.V1Routes(tCfg))
+	// r.Mount("/api", userApp.V1Routes(tCfg))
+	// r.Mount("/api", Player.V1Routes(tCfg))
+
+	return r
 }

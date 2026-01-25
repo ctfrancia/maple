@@ -1,6 +1,7 @@
 package tournamentapp
 
 import (
+	"github.com/ctfrancia/maple/app/sdk/web"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/foundation/logger"
 
@@ -13,18 +14,21 @@ type Config struct {
 	//AuthClient    *auth.Client
 }
 
-func Routes(cfg Config) chi.Router {
-	const v1 = "v1"
-	api := newApp(cfg.TournamentBus)
+func V1Routes(cfg Config) chi.Router {
 	r := chi.NewRouter()
+	api := newApp(cfg.TournamentBus)
+	v1BasePath := "/v1/tournament"
 
 	// Domain-specific middleware
 	//r.Use(middleware.TournamentAuth)
 
-	r.Route("/"+v1, func(v1 chi.Router) {
-		v1.Post("/tournament", api.create)
-		//v1.Get("/tournaments", api.query)
-		//v1.Get("/tournament/{id}", api.queryByID)
+	r.Route(v1BasePath, func(v1 chi.Router) {
+		v1.Post("/", web.Wrap(cfg.Log, api.create))
+		v1.Get("/", web.Wrap(cfg.Log, api.query))
+		v1.Get("/{uuid}", web.Wrap(cfg.Log, api.fetch))
+		v1.Put("/{uuid}", web.Wrap(cfg.Log, api.update))
+		v1.Patch("/{uuid}", web.Wrap(cfg.Log, api.partialUpdate))
+		v1.Delete("/{uuid}", web.Wrap(cfg.Log, api.delete))
 	})
 
 	return r

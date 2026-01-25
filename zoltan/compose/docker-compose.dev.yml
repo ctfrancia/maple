@@ -1,5 +1,7 @@
 services:
   database:
+    environment:
+      POSTGRES_DB: mydb
     ports:
       - "5432:5432"  # Expose for pgAdmin, DBeaver, etc.
     volumes:
@@ -13,11 +15,11 @@ services:
       context: ../..
       dockerfile: zoltan/docker/dockerfile.maple
     ports:
-      - "8080:8080"
-      - "4000:4000"
-    volumes:
+      - "3000:3000"  # Expose for testing
+      - "3010:3010" # Debug
+    # volumes:
      # - ./backend:/app  # Hot reload (if applicable)
-      - ../..:/app  # Hot reload (if applicable)
+     # - ../..:/app  # Hot reload (if applicable)
     # Override with local image
     image: localhost/maple/backend:dev
 

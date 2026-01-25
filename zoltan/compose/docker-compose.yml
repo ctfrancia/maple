@@ -3,11 +3,11 @@ services:
     image: postgres:18.0
     container_name: database
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -h localhost -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -17,7 +17,7 @@ services:
     image: maple/backend:${VERSION:-latest}
     container_name: maple
     ports:
-      - "4000:4000"
+      - "3000:3000"
     environment:
       - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
       - MAPLE_AUTH_HOST=http://auth:6000
@@ -48,7 +48,7 @@ services:
     container_name: metrics
     environment:
       - GOMAXPROCS=1
-      - METRICS_COLLECT_FROM=http://backend:4000/debug/vars
+      - METRICS_COLLECT_FROM=http://backend:3010/debug/vars
     depends_on:
       - backend
 
@@ -85,7 +85,7 @@ services:
     image: grafana/grafana:latest
     container_name: grafana
     ports:
-      - "3000:3000"
+      - "3100:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
@@ -96,7 +96,29 @@ services:
       - prometheus
       - tempo
 
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3300:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+
 volumes:
   prometheus-data:
   tempo-data:
   grafana-data:
+  loki-data:
