@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	//"github.com/ctfrancia/maple/app/sdk/mux/middleware"
-	"github.com/ctfrancia/maple/app/domain/tournamentapp"
 	"github.com/go-chi/chi/v5"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"

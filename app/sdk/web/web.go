@@ -18,6 +18,7 @@ type Response struct {
 }
 
 // HandlerFunc is the custom handler that returns a Response and error
+// TODO: revist this as it might not be necessary to have the w/r in the signature
 type HandlerFunc func(w http.ResponseWriter, r *http.Request) (*Response, error)
 
 func Wrap(log *logger.Logger, h HandlerFunc) http.HandlerFunc {

@@ -1,5 +1,7 @@
 services:
   database:
+    environment:
+      POSTGRES_DB: mydb
     ports:
       - "5432:5432"  # Expose for pgAdmin, DBeaver, etc.
     volumes:

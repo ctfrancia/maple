@@ -67,3 +67,7 @@ type registration struct {
 	Fee     string
 	Contact string
 }
+
+func CreateMigration(db *gorm.DB) error {
+	return db.AutoMigrate(&tournament{})
+}

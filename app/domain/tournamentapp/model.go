@@ -33,7 +33,8 @@ func toBusNewTournament(ctx context.Context, nt NewTournament) (tournamentbus.Ne
 	validationErr := errs.NewValidationError()
 	ID, err := mid.GetUserID(ctx)
 	if err != nil {
-		validationErr.Add("created_by", "cannot be empty")
+		// TODO: this needs to be done once we have auth
+		// validationErr.Add("creator", "missing in request")
 	}
 
 	name, err := name.Parse(strings.TrimSpace(nt.Name))
