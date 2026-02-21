@@ -23,6 +23,8 @@ type Storer interface {
 	Query(ctx context.Context, filter any, orderBy any, page any) ([]Player, error)
 	Update(ctx context.Context, id uuid.UUID, np NewPlayer) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	// Used for scraping
+	UpsertPlayers(ctx context.Context, tournamentID uuid.UUID, players []Player) error
 }
 
 // Business manages the set of APIs for the player api access.

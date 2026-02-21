@@ -3,6 +3,7 @@ package tournamentdb
 
 import (
 	"context"
+	"time"
 
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	tb "github.com/ctfrancia/maple/business/domain/tournamentbus"
@@ -30,6 +31,12 @@ type Storer interface {
 	// Count(ctx context.Context, filter QueryFilter) (int, error)
 	// QueryByID(ctx context.Context, userID uuid.UUID) (tb.Tournament, error)
 	// QueryByEmail(ctx context.Context, email mail.Address) (tb.Tournament, error)
+
+	// Used for scraping
+	KnownTournamentIDs(ctx context.Context, federation string) (map[uuid.UUID]bool, error)
+	UpsertTournament(ctx context.Context, t tb.Tournament) (isnew bool, err error)
+	UpdateStatus(ctx context.Context, tournamentID uuid.UUID, status string) error
+	TournamentsToScrape(ctx context.Context, maxAge time.Duration) ([]tb.Tournament, error)
 }
 
 // Store manages the set of APIs for the tournament database access.
@@ -40,6 +47,15 @@ type Store struct {
 
 // NewStore contructs the API for data access.
 func NewStore(log *logger.Logger, db *gorm.DB) *Store {
+	psql, err := db.DB()
+	if err != nil {
+		return nil
+	}
+
+	psql.SetMaxOpenConns(10)
+	psql.SetMaxIdleConns(5)
+	psql.SetConnMaxLifetime(5 * time.Minute)
+
 	return &Store{
 		log: log,
 		db:  db,
@@ -84,4 +100,21 @@ func (s *Store) Query(ctx context.Context, filter tournamentbus.QueryFilter, ord
 
 func (s *Store) QueryByID(ctx context.Context, tID uuid.UUID) (tb.Tournament, error) {
 	return tb.Tournament{}, nil
+}
+
+// ----------------- SCRAPING METHODS-----------------
+func (s *Store) KnownTournamentIDs(ctx context.Context, federation string) (map[uuid.UUID]bool, error) {
+	return nil, nil
+}
+
+func (s *Store) UpsertTournament(ctx context.Context, t tb.Tournament) (isnew bool, err error) {
+	return false, nil
+}
+
+func (s *Store) UpdateStatus(ctx context.Context, id uuid.UUID, status string) error {
+	return nil
+}
+
+func (s *Store) TournamentsToScrape(_ context.Context, maxAge time.Duration) ([]tb.Tournament, error) {
+	return nil, nil
 }
