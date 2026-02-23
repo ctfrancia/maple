@@ -16,6 +16,7 @@ type Tournament struct {
 	Name         string
 	Description  string
 	Poster       string
+	Federation   string
 	Rounds       uint8
 	Contact      Contact      `gorm:"embedded;embeddedPrefix:contact_"`
 	Location     Location     `gorm:"embedded;embeddedPrefix:location_"`
