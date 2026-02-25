@@ -3,6 +3,7 @@ package tournamentdb
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
@@ -55,6 +56,10 @@ func NewStore(log *logger.Logger, db *gorm.DB) *Store {
 	psql.SetMaxOpenConns(10)
 	psql.SetMaxIdleConns(5)
 	psql.SetConnMaxLifetime(5 * time.Minute)
+
+	if err := psql.Ping(); err != nil {
+		return nil, fmt.Errorf("pinging database: %w", err)
+	}
 
 	return &Store{
 		log: log,

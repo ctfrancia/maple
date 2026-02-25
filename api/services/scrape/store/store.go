@@ -1,5 +1,6 @@
 package store
 
+/*
 import (
 	"context"
 	"fmt"
@@ -297,3 +298,4 @@ func (s *PostgresStore) TournamentsToScrape(ctx context.Context, maxAge time.Dur
 func (s *PostgresStore) Close() error {
 	return s.db.Close()
 }
+*/
