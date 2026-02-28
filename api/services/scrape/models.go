@@ -1,4 +1,4 @@
-package models
+package main
 
 import "time"
 
@@ -17,9 +17,9 @@ const (
 
 // Event is published when the scraper discovers or updates tournament data.
 type Event struct {
-	Type         EventType `json:"type"`
-	Timestamp    time.Time `json:"timestamp"`
-	TournamentID string    `json:"tournament_id"`
-	Federation   string    `json:"federation,omitempty"`
-	Payload      any       `json:"payload,omitempty"`
+	Type         EventType   `json:"type"`
+	Timestamp    time.Time   `json:"timestamp"`
+	TournamentID string      `json:"tournament_id"`
+	Federation   string      `json:"federation,omitempty"`
+	Payload      interface{} `json:"payload,omitempty"`
 }

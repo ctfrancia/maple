@@ -47,10 +47,10 @@ type Store struct {
 }
 
 // NewStore contructs the API for data access.
-func NewStore(log *logger.Logger, db *gorm.DB) *Store {
+func NewStore(log *logger.Logger, db *gorm.DB) (*Store, error) {
 	psql, err := db.DB()
 	if err != nil {
-		return nil
+		return nil, nil
 	}
 
 	psql.SetMaxOpenConns(10)
@@ -64,7 +64,7 @@ func NewStore(log *logger.Logger, db *gorm.DB) *Store {
 	return &Store{
 		log: log,
 		db:  db,
-	}
+	}, nil
 }
 
 // NewWithTx creates a new Store using the provided transaction.
