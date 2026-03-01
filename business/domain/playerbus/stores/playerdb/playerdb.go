@@ -3,15 +3,17 @@ package playerdb
 import (
 	"context"
 	"fmt"
-	"github.com/ctfrancia/maple/foundation/logger"
 	"time"
+
+	"github.com/ctfrancia/maple/business/domain/playerbus"
+	"github.com/ctfrancia/maple/foundation/logger"
 
 	"gorm.io/gorm"
 )
 
 type Storer interface {
 	// Related to scraping
-	UpsertPlayers(ctx context.Context, tournamentID string, players []models.Player) error
+	UpsertPlayers(ctx context.Context, tournamentID string, players []playerbus.Player) error
 }
 
 type Store struct {
@@ -40,36 +42,29 @@ func NewStore(log *logger.Logger, db *gorm.DB) (*Store, error) {
 	}, nil
 }
 
-func (s *Store) UpsertPlayers(ctx context.Context, tournamentID string, players []models.Player) error {
-	tx, err := s.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback()
-
-	if _, err := tx.ExecContext(ctx, `DELETE FROM players WHERE tournament_id = $1`, tournamentID); err != nil {
-		return err
-	}
-
-	stmt, err := tx.PrepareContext(ctx,
-		`INSERT INTO players (tournament_id, rank, title, name, fide_id, federation, rating, points, rating_perf)
-		 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	for _, p := range players {
-		if _, err := stmt.ExecContext(ctx, tournamentID, p.Rank, p.Title, p.Name, p.FideID, p.Federation, p.Rating, p.Points, p.RatingPerf); err != nil {
+func (s *Store) UpsertPlayers(ctx context.Context, tournamentID string, players []playerbus.Player) error {
+	return s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("tournament_id = ?", tournamentID).Delete(&playerbus.Player{}).Error; err != nil {
 			return err
 		}
-	}
 
-	if _, err := tx.ExecContext(ctx,
-		`UPDATE tournaments SET status='scraped', last_scraped=NOW(), updated_at=NOW() WHERE id=$1`,
-		tournamentID); err != nil {
-		return err
-	}
+		if len(players) > 0 {
+			// Set tournament_id on each player
+			for i := range players {
+				players[i].TournamentID = tournamentID
+			}
 
-	return tx.Commit()
+			if err := tx.Create(&players).Error; err != nil {
+				return err
+			}
+		}
+
+		return tx.Model(&Tournament{}).
+			Where("id = ?", tournamentID).
+			Updates(map[string]any{
+				"status":       "scraped",
+				"last_scraped": gorm.Expr("NOW()"),
+				"updated_at":   gorm.Expr("NOW()"),
+			}).Error
+	})
 }
