@@ -1,0 +1,29 @@
+# syntax=docker/dockerfile:1
+FROM golang:1.25-alpine AS build_scraper
+
+FROM golang:1.25 AS build_maple
+ENV CGO_ENABLED=0
+
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /chess-results-scraper ./cmd/service
+
+# --- Runtime ---
+FROM alpine:3.20
+
+RUN apk --no-cache add ca-certificates tzdata
+COPY --from=build_scraper /chess-results-scraper /usr/local/bin/chess-results-scraper
+
+# Non-root user.
+RUN adduser -D -u 1000 scraper
+USER scraper
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
+  CMD wget -qO- http://localhost:8080/healthz || exit 1
+
+ENTRYPOINT ["chess-results-scraper"]
