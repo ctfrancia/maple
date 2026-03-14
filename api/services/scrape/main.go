@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"expvar"
 	"fmt"
 	"os"
 	"time"
@@ -11,6 +12,10 @@ import (
 	"github.com/ctfrancia/maple/foundation/logger"
 	"github.com/ctfrancia/maple/foundation/otel"
 	"github.com/joho/godotenv"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	glogger "gorm.io/gorm/logger"
 )
 
 var build = "develop"
@@ -82,11 +87,11 @@ func run(ctx context.Context, log *logger.Logger) error {
 	}{
 		Version: conf.Version{
 			Build: build,
-			Desc:  "Maple",
+			Desc:  "Scraper for Maple",
 		},
 	}
 
-	const prefix = "MAPLE"
+	const prefix = "SCRAPER"
 	help, err := conf.Parse(prefix, cfg)
 	if err != nil {
 		if errors.Is(err, conf.ErrHelpWanted) {
@@ -96,6 +101,51 @@ func run(ctx context.Context, log *logger.Logger) error {
 
 		return fmt.Errorf("parsing config: %w", err)
 	}
+
+	log.Info(ctx, "starting service", "version", cfg.Build)
+	defer log.Info(ctx, "shutdown complete")
+
+	out, err := conf.String(&cfg)
+	if err != nil {
+		return fmt.Errorf("generating config for output: %w", err)
+	}
+
+	log.Info(ctx, "startup", "config", out)
+
+	expvar.NewString("build").Set(cfg.Build)
+
+	// -------------------------------------------------------------------------
+	// DB startup ==============================================================
+	// -------------------------------------------------------------------------
+	log.Info(ctx, "startup", "status", "intitializing database support", "hostport", cfg.DB.Host)
+
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		return fmt.Errorf("DATABASE_URL not set")
+	}
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: glogger.Default.LogMode(glogger.Info),
+	})
+	if err != nil {
+		return fmt.Errorf("opening database: %w", err)
+	}
+
+	/*
+		err = tournamentdb.CreateMigration(db)
+		if err != nil {
+			return fmt.Errorf("creating migration: %w", err)
+		}
+	*/
+
+	psql, err := db.DB()
+	if err != nil {
+		return fmt.Errorf("getting database connection: %w", err)
+	}
+
+	psql.SetMaxIdleConns(cfg.DB.MaxIdleConns)
+	psql.SetMaxOpenConns(cfg.DB.MaxOpenConns)
+
+	defer psql.Close()
 
 	return nil
 }
