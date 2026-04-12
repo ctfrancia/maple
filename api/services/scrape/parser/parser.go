@@ -18,13 +18,13 @@ var (
 )
 
 // ParseTournamentInfo extracts tournament metadata from the main tournament page.
-func ParseTournamentInfo(html []byte, tournamentID string) (*models.Tournament, error) {
+func ParseTournamentInfo(html []byte, tournamentID string) (*Tournament, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
 	}
 
-	t := &models.Tournament{
+	t := &Tournament{
 		ID:  tournamentID,
 		URL: fmt.Sprintf("https://chess-results.com/tnr%s.aspx?lan=1", tournamentID),
 	}
@@ -84,13 +84,13 @@ func ParseTournamentInfo(html []byte, tournamentID string) (*models.Tournament, 
 }
 
 // ParseStandings extracts the final standings (art=0) or starting rank (art=1).
-func ParseStandings(html []byte) ([]models.Player, error) {
+func ParseStandings(html []byte) ([]Player, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
 	}
 
-	var players []models.Player
+	var players []Player
 
 	var headers []string
 	doc.Find("table.CRs1 tr").First().Find("th, td").Each(func(_ int, s *goquery.Selection) {
@@ -113,7 +113,7 @@ func ParseStandings(html []byte) ([]models.Player, error) {
 			return
 		}
 
-		p := models.Player{}
+		p := Player{}
 		cellTexts := make([]string, cells.Length())
 		cells.Each(func(j int, cell *goquery.Selection) {
 			cellTexts[j] = normalizeText(cell.Text())
@@ -170,13 +170,13 @@ func ParseStandings(html []byte) ([]models.Player, error) {
 }
 
 // ParseRoundPairings extracts pairings from a round view (art=4&rd=N).
-func ParseRoundPairings(html []byte) ([]models.RoundPairing, error) {
+func ParseRoundPairings(html []byte) ([]RoundPairing, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
 	}
 
-	var pairings []models.RoundPairing
+	var pairings []RoundPairing
 	doc.Find("table.CRs1 tr, table.CRs2 tr").Each(func(i int, s *goquery.Selection) {
 		if i == 0 {
 			return
@@ -190,7 +190,7 @@ func ParseRoundPairings(html []byte) ([]models.RoundPairing, error) {
 			cellTexts[j] = normalizeText(cell.Text())
 		})
 
-		p := models.RoundPairing{}
+		p := RoundPairing{}
 		if len(cellTexts) >= 6 {
 			p.Board = extractInt(cellTexts[0])
 			p.WhitePlayer = cellTexts[1]
@@ -208,13 +208,13 @@ func ParseRoundPairings(html []byte) ([]models.RoundPairing, error) {
 }
 
 // ParseFederationTournaments extracts tournament listings from a federation page.
-func ParseFederationTournaments(html []byte) ([]models.FederationTournamentEntry, error) {
+func ParseFederationTournaments(html []byte) ([]FederationTournamentEntry, error) {
 	doc, err := goquery.NewDocumentFromReader(bytes.NewReader(html))
 	if err != nil {
 		return nil, fmt.Errorf("parsing HTML: %w", err)
 	}
 
-	var tournaments []models.FederationTournamentEntry
+	var tournaments []FederationTournamentEntry
 	doc.Find("table.CRs1 tr, table.CRs2 tr, table tr").Each(func(i int, s *goquery.Selection) {
 		if i == 0 {
 			return
@@ -228,7 +228,7 @@ func ParseFederationTournaments(html []byte) ([]models.FederationTournamentEntry
 			if len(matches) < 2 {
 				return
 			}
-			entry := models.FederationTournamentEntry{
+			entry := FederationTournamentEntry{
 				ID:   matches[1],
 				Name: normalizeText(a.Text()),
 				URL:  fmt.Sprintf("https://chess-results.com/tnr%s.aspx?lan=1", matches[1]),

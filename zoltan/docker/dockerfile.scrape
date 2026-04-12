@@ -1,29 +1,40 @@
-# syntax=docker/dockerfile:1
-FROM golang:1.25-alpine AS build_scraper
-
-FROM golang:1.25 AS build_maple
+# Build the Go Binary.
+FROM golang:1.25 AS build_scraper
 ENV CGO_ENABLED=0
+ARG BUILD_REF
 
-WORKDIR /app
-COPY go.mod go.sum ./
+# Create the service directory and the copy the module files first and then
+# download the dependencies. If this doesn't change, we won't need to do this
+# again in future builds.
+RUN mkdir /maple
+COPY go.* /maple/
+WORKDIR /maple
 RUN go mod download
 
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /chess-results-scraper ./cmd/service
+# Copy the source code into the container.
+COPY . /maple
 
-# --- Runtime ---
-FROM alpine:3.20
+# Build the service binary.
+WORKDIR /maple/api/services/scrape
+RUN go build -ldflags "-X main.build=${BUILD_REF}" -o scraper
 
-RUN apk --no-cache add ca-certificates tzdata
-COPY --from=build_scraper /chess-results-scraper /usr/local/bin/chess-results-scraper
+# Run the Go Binary in Alpine.
+FROM alpine:3.22
+ARG BUILD_DATE
+ARG BUILD_REF
+RUN addgroup -g 1000 -S scraper && \
+    adduser -u 1000 -h /scraper -G scraper -S scraper
+COPY --from=build_scraper --chown=scraper:scraper /maple/api/services/scrape/scraper /scraper/scraper
 
-# Non-root user.
-RUN adduser -D -u 1000 scraper
+RUN chmod +x /scraper/scraper
+
+WORKDIR /scraper
 USER scraper
+CMD ["./scraper"]
 
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
-  CMD wget -qO- http://localhost:8080/healthz || exit 1
-
-ENTRYPOINT ["chess-results-scraper"]
+LABEL org.opencontainers.image.created="${BUILD_DATE}" \
+    org.opencontainers.image.title="scraper-service" \
+    org.opencontainers.image.authors="Christian Francia <christian.francia@hey.com>" \
+    org.opencontainers.image.source="https://github.com/ctfrancia/maple" \
+    org.opencontainers.image.revision="${BUILD_REF}" \
+    org.opencontainers.image.vendor=""

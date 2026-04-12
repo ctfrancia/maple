@@ -9,13 +9,13 @@ import (
 	"net/http"
 	"time"
 
-	models "github.com/ctfrancia/maple/api/services/scrape/domain"
+	"github.com/ctfrancia/maple/api/services/scrape/events"
 )
 
 // Publisher emits events when tournaments are discovered or updated.
 // Other maple microservices can consume these events.
 type Publisher interface {
-	Publish(ctx context.Context, event models.Event) error
+	Publish(ctx context.Context, event events.Event) error
 	Close() error
 }
 
@@ -30,7 +30,7 @@ func NewLogPublisher(logger *slog.Logger) *LogPublisher {
 	return &LogPublisher{logger: logger}
 }
 
-func (p *LogPublisher) Publish(_ context.Context, event models.Event) error {
+func (p *LogPublisher) Publish(_ context.Context, event events.Event) error {
 	p.logger.Info("event published",
 		"type", event.Type,
 		"tournament_id", event.TournamentID,
@@ -60,7 +60,7 @@ func NewWebhookPublisher(url string, logger *slog.Logger) *WebhookPublisher {
 	}
 }
 
-func (p *WebhookPublisher) Publish(ctx context.Context, event models.Event) error {
+func (p *WebhookPublisher) Publish(ctx context.Context, event events.Event) error {
 	body, err := json.Marshal(event)
 	if err != nil {
 		return fmt.Errorf("marshalling event: %w", err)
@@ -100,7 +100,7 @@ func NewMultiPublisher(publishers ...Publisher) *MultiPublisher {
 	return &MultiPublisher{publishers: publishers}
 }
 
-func (p *MultiPublisher) Publish(ctx context.Context, event models.Event) error {
+func (p *MultiPublisher) Publish(ctx context.Context, event events.Event) error {
 	var firstErr error
 	for _, pub := range p.publishers {
 		if err := pub.Publish(ctx, event); err != nil && firstErr == nil {

@@ -4,8 +4,10 @@ package mux
 import (
 	"net/http"
 
+	"github.com/ctfrancia/maple/app/domain/scraperapp"
 	"github.com/ctfrancia/maple/app/domain/tournamentapp"
 	"github.com/ctfrancia/maple/app/sdk/mux/middleware"
+	"github.com/ctfrancia/maple/business/domain/scraperbus"
 	"github.com/ctfrancia/maple/business/domain/tournamentbus"
 	"github.com/ctfrancia/maple/foundation/logger"
 
@@ -17,6 +19,7 @@ import (
 
 type BusConfig struct {
 	TournamentBus tournamentbus.ExtBusiness
+	ScraperBus    scraperbus.ExtBusiness
 }
 
 // AuthConfig contains all the mandarory components for the system.
@@ -43,11 +46,17 @@ func WebAPI(cfg Config) http.Handler {
 	r.Use(middleware.Metrics())
 	r.Use(chimid.Recoverer)
 
-	tCfg := tournamentapp.Config{Log: cfg.Log, TournamentBus: cfg.BusConfig.TournamentBus}
-	r.Mount("/api", tournamentapp.V1Routes(tCfg))
-	//r.Mount("/api", tournamentapp.V1Routes(tCfg))
-	// r.Mount("/api", userApp.V1Routes(tCfg))
-	// r.Mount("/api", Player.V1Routes(tCfg))
+	// Mount tournament routes if configured
+	if cfg.BusConfig.TournamentBus != nil {
+		tCfg := tournamentapp.Config{Log: cfg.Log, TournamentBus: cfg.BusConfig.TournamentBus}
+		r.Mount("/api", tournamentapp.V1Routes(tCfg))
+	}
+
+	// Mount scraper routes if configured
+	if cfg.BusConfig.ScraperBus != nil {
+		sCfg := scraperapp.Config{Log: cfg.Log, ScraperBus: cfg.BusConfig.ScraperBus}
+		r.Mount("/api", scraperapp.V1Routes(sCfg))
+	}
 
 	return r
 }

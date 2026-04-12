@@ -6,7 +6,11 @@ scrape_configs:
   - job_name: 'maple-backend'
     static_configs:
       - targets: ['backend:3010']  # Adjust port to where your app exposes /metrics
-    
+
   - job_name: 'maple-metrics'
     static_configs:
       - targets: ['metrics:4020']
+
+  - job_name: 'maple-scraper'
+    static_configs:
+      - targets: ['scraper:8081']  # Scraper debug port

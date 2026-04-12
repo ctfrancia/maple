@@ -39,3 +39,12 @@ services:
       - "4010:4010"
       - "4020:4020"
     image: localhost/maple/metrics:dev
+
+  scraper:
+    build:
+      context: ../..
+      dockerfile: zoltan/docker/dockerfile.scrape
+    ports:
+      - "8080:8080"  # API
+      - "8081:8081"  # Debug
+    image: localhost/maple/scraper:dev

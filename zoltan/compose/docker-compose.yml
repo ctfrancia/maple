@@ -52,6 +52,23 @@ services:
     depends_on:
       - backend
 
+  scraper:
+    image: maple/scraper:${VERSION:-latest}
+    container_name: scraper
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}
+      - SCRAPER_FEDERATIONS=CAT
+      - SCRAPER_LOCATION_FILTER=Barcelona
+      - SCRAPER_PUBLISHER_TYPE=log
+    depends_on:
+      database:
+        condition: service_healthy
+      tempo:
+        condition: service_started
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus

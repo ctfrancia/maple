@@ -161,7 +161,10 @@ func run(ctx context.Context, log *logger.Logger) error {
 	// ===========================================================================================
 
 	tournamentOtelExt := tournamentotel.NewExtension()
-	tournamentStore := tournamentdb.NewStore(log, db)
+	tournamentStore, err := tournamentdb.NewStore(log, db)
+	if err != nil {
+		return fmt.Errorf("creating tournament store: %w", err)
+	}
 	tournamentBus := tournamentbus.NewBusiness(log, tournamentStore, tournamentOtelExt)
 
 	// -------------------------------------------------------------------------

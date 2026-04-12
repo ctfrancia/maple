@@ -32,11 +32,13 @@ PROMTAIL        := grafana/promtail:3.5.0
 NAMESPACE       := maple-system
 MAPLE_APP       := maple
 AUTH_APP        := auth
+SCRAPER_APP     := scraper
 BASE_IMAGE_NAME := localhost/maple
 VERSION         := 0.0.1
 MAPLE_IMAGE     := $(BASE_IMAGE_NAME)/$(MAPLE_APP):$(VERSION)
 METRICS_IMAGE   := $(BASE_IMAGE_NAME)/metrics:$(VERSION)
 AUTH_IMAGE      := $(BASE_IMAGE_NAME)/$(AUTH_APP):$(VERSION)
+SCRAPER_IMAGE   := $(BASE_IMAGE_NAME)/$(SCRAPER_APP):$(VERSION)
 # VERSION       := "0.0.1-$(shell git rev-parse --short HEAD)"
 
 # ==============================================================================
@@ -76,7 +78,7 @@ dev-docker:
 
 # =========== BUILD CONTAINERS ===========
 
-build: maple metrics auth ## Build all containers
+build: maple metrics auth scraper ## Build all containers
 
 maple: ## Build the maple container
 	docker build \
@@ -102,6 +104,15 @@ auth: ## Build the auth container
 		-f zoltan/docker/dockerfile.auth \
 		-t $(AUTH_IMAGE) \
 		-t $(BASE_IMAGE_NAME)/auth:dev \
+		--build-arg BUILD_REF=$(VERSION) \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		.
+
+scraper: ## Build the scraper container
+	docker build \
+		-f zoltan/docker/dockerfile.scrape \
+		-t $(SCRAPER_IMAGE) \
+		-t $(BASE_IMAGE_NAME)/scraper:dev \
 		--build-arg BUILD_REF=$(VERSION) \
 		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 		.
