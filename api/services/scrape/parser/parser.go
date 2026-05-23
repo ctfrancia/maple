@@ -215,7 +215,7 @@ func ParseFederationTournaments(html []byte) ([]FederationTournamentEntry, error
 	}
 
 	var tournaments []FederationTournamentEntry
-	doc.Find("table.CRs1 tr, table.CRs2 tr, table tr").Each(func(i int, s *goquery.Selection) {
+	doc.Find("table.CRs1 tr, table.CRs2 tr").Each(func(i int, s *goquery.Selection) {
 		if i == 0 {
 			return
 		}
@@ -325,11 +325,14 @@ func containsAny(s string, substrs ...string) bool {
 }
 
 func looksLikeDate(s string) bool {
+	if len(s) > 50 {
+		return false
+	}
 	return regexp.MustCompile(`\d{2}[\./]\d{2}[\./]\d{4}`).MatchString(s) ||
 		regexp.MustCompile(`\d{4}-\d{2}-\d{2}`).MatchString(s) ||
 		containsAny(s, "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec")
 }
 
 func looksLikeLocation(s string) bool {
-	return strings.Contains(s, ",") || len(s) > 3
+	return len(s) > 3 && len(s) < 100 && strings.Contains(s, ",")
 }

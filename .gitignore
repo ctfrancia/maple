@@ -1,3 +1,7 @@
 go.workspace
 
 .env
+
+CLAUDE.md
+
+zoltan/compose/database-data/*

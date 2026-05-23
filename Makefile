@@ -143,6 +143,44 @@ audit: ## Run the audit service
 	govulncheck ./...
 
 # ==============================================================================
+# Scraper live tests (hit chess-results.com directly, no DB required)
+#
+# Usage:
+#   make scrape-fed               - list tournaments for default federation (ESP)
+#   make scrape-fed FED=ENG       - list tournaments for a specific federation
+#   make scrape-tnr TNR=1411717   - info + standings + round 1 for a tournament
+#   make scrape-info TNR=1411717  - tournament metadata only
+#   make scrape-standings TNR=1411717          - standings only
+#   make scrape-pairings TNR=1411717 ROUND=3   - pairings for a specific round
+
+FED   ?= ESP
+ROUND ?= 1
+
+.PHONY: scrape-fed
+scrape-fed: ## List tournaments for a federation (FED=ESP)
+	TEST_FED=$(FED) go test -tags=integration -v -run TestLiveFederation ./api/services/scrape/
+
+.PHONY: scrape-tnr
+scrape-tnr: ## Full dump for a tournament: info + standings + round 1 (TNR=<id>)
+	@test -n "$(TNR)" || (echo "usage: make scrape-tnr TNR=<tournament_id>" && exit 1)
+	TEST_TNR_ID=$(TNR) go test -tags=integration -v -run TestLiveAll ./api/services/scrape/
+
+.PHONY: scrape-info
+scrape-info: ## Tournament metadata only (TNR=<id>)
+	@test -n "$(TNR)" || (echo "usage: make scrape-info TNR=<tournament_id>" && exit 1)
+	TEST_TNR_ID=$(TNR) go test -tags=integration -v -run TestLiveTournamentInfo ./api/services/scrape/
+
+.PHONY: scrape-standings
+scrape-standings: ## Standings for a tournament (TNR=<id>)
+	@test -n "$(TNR)" || (echo "usage: make scrape-standings TNR=<tournament_id>" && exit 1)
+	TEST_TNR_ID=$(TNR) go test -tags=integration -v -run TestLiveStandings ./api/services/scrape/
+
+.PHONY: scrape-pairings
+scrape-pairings: ## Round pairings (TNR=<id> ROUND=<n>, default ROUND=1)
+	@test -n "$(TNR)" || (echo "usage: make scrape-pairings TNR=<tournament_id>" && exit 1)
+	TEST_TNR_ID=$(TNR) TEST_ROUND=$(ROUND) go test -tags=integration -v -run TestLiveRoundPairings ./api/services/scrape/
+
+# ==============================================================================
 # RUN
 #
 .PHONY: dev
